@@ -10,7 +10,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /*background: radial-gradient(circle, white, black);*/
 }
 
 .shape {
@@ -21,4 +20,17 @@ body {
 
 svg path {
   transition: 0.2s;
+}
+
+#buttons {
+  position: fixed;
+  top: 30px;
+}
+
+button {
+  width: 90px;
+  padding: 7px;
+  background: white;
+  border-radius: 20px;
+  border: solid 1px black;
 }

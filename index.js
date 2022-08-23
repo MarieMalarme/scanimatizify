@@ -119,17 +119,18 @@ shape.append(svg)
 body.append(shape)
 
 const interpolator = flubber.interpolate(shapes_paths[0], shapes_paths[1])
-path.setAttribute('d', interpolator(1))
+// path.setAttribute('d', interpolator(1))
 
-/*
 // morphing animation
 // let interpolator
 let morph_step = 0
 let hue_step = 0
 let path_index = 0
 let rewind
+let paused = false
 
 setInterval(() => {
+  if (paused) return
   // set 2 shapes to morph when no morphing is ongoing
   // if (morph_step === 0) {
   //   const last_index = shapes_paths.length - 1
@@ -163,4 +164,17 @@ setInterval(() => {
   // morph_step = is_last_morph_step ? 0 : morph_step + 0.02
   // hue_step++
 }, 20)
-*/
+
+const buttons = document.createElement('div')
+buttons.id = 'buttons'
+
+const video_button = document.createElement('button')
+video_button.textContent = 'Pause'
+
+buttons.append(video_button)
+body.append(buttons)
+
+video_button.addEventListener('click', () => {
+  paused = !paused
+  video_button.textContent = paused ? 'Play' : 'Pause'
+})
