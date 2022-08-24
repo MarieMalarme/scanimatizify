@@ -275,10 +275,12 @@ shapes_paths.forEach((shape_path, index) => {
 body.append(shape_selectors)
 
 // scanimation settings
-let frames_amount
+let frames_amount = 4
+let slice_size = 2
 
 const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
+
 const frames = document.createElement('div')
 const frames_label = document.createElement('label')
 frames_label.textContent = 'Frames'
@@ -286,12 +288,27 @@ const frames_input = document.createElement('input')
 frames_input.type = 'number'
 frames_input.min = 2
 frames_input.max = 20
-frames_input.value = 4
+frames_input.value = frames_amount
 frames_input.addEventListener('click', (event) => {
   frames_amount = event.target.value
 })
-
 frames.append(frames_input)
 frames.append(frames_label)
 scanimation_settings.append(frames)
+
+const slice = document.createElement('div')
+const slice_label = document.createElement('label')
+slice_label.textContent = 'Slice size'
+const slice_input = document.createElement('input')
+slice_input.type = 'number'
+slice_input.min = 1
+slice_input.max = 5
+slice_input.value = slice_size
+slice_input.addEventListener('click', (event) => {
+  slice_size = event.target.value
+})
+slice.append(slice_input)
+slice.append(slice_label)
+scanimation_settings.append(slice)
+
 body.append(scanimation_settings)

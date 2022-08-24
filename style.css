@@ -109,6 +109,10 @@ button.selected {
   left: 50px;
 }
 
+#scanimation-settings div {
+  margin-bottom: 10px;
+}
+
 input {
   margin-right: 10px;
   outline: none;
