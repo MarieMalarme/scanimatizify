@@ -175,6 +175,7 @@ shape_selectors.className = 'shape-selectors'
 shapes_paths.forEach((shape_path, index) => {
   const shape_selector = document.createElement('div')
   shape_selector.className = 'shape-selector'
+  shape_selector.style.width = `calc(${100 / shapes_paths.length}%)`
 
   const svg = document.createElementNS(w3_url, 'svg')
   svg.setAttribute('viewBox', '0 0 1000 1000')

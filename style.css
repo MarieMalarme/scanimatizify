@@ -13,8 +13,11 @@ body {
 }
 
 .shape {
+  max-height: 80vh;
   width: 55vw;
-  padding: 100px;
+  max-width: 80vh;
+  min-width: 600px;
+  padding: 80px;
 }
 
 #buttons {
@@ -34,11 +37,14 @@ button {
   position: fixed;
   bottom: 30px;
   display: flex;
+  justify-content: center;
+  width: 100vw;
+  padding: 0px 50px;
 }
 
 .shape-selector {
-  width: 40px;
-  height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   padding: 7px;
 }
 
