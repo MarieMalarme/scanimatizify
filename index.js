@@ -277,10 +277,13 @@ body.append(shape_selectors)
 // scanimation settings
 let frames_amount = 4
 let slice_size = 2
+const animation_directions = ['Left', 'Right', 'Up', 'Down']
+let animation_direction = animation_directions[0]
 
 const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
 
+// input to set number of frames of the animation
 const frames = document.createElement('div')
 const frames_label = document.createElement('label')
 frames_label.textContent = 'Frames'
@@ -296,6 +299,7 @@ frames.append(frames_input)
 frames.append(frames_label)
 scanimation_settings.append(frames)
 
+// input to set size of one slice to cut the images
 const slice = document.createElement('div')
 const slice_label = document.createElement('label')
 slice_label.textContent = 'Slice size'
@@ -310,5 +314,23 @@ slice_input.addEventListener('click', (event) => {
 slice.append(slice_input)
 slice.append(slice_label)
 scanimation_settings.append(slice)
+
+// input to set direction of the animation
+const direction = document.createElement('div')
+const direction_label = document.createElement('label')
+direction_label.textContent = 'Animation direction'
+const direction_input = document.createElement('select')
+animation_directions.map((direction) => {
+  const option = document.createElement('option')
+  option.text = direction
+  direction_input.append(option)
+})
+direction_input.value = animation_direction
+direction_input.addEventListener('change', (event) => {
+  animation_direction = event.target.value
+})
+direction.append(direction_input)
+direction.append(direction_label)
+scanimation_settings.append(direction)
 
 body.append(scanimation_settings)
