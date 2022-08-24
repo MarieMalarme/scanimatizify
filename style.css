@@ -14,12 +14,7 @@ body {
 
 .shape {
   width: 55vw;
-  border: solid 1px black;
   padding: 100px;
-}
-
-svg path {
-  transition: 0.2s;
 }
 
 #buttons {
@@ -33,4 +28,25 @@ button {
   background: white;
   border-radius: 20px;
   border: solid 1px black;
+}
+
+.shape-selectors {
+  position: fixed;
+  bottom: 30px;
+  display: flex;
+}
+
+.shape-selector {
+  width: 40px;
+  height: 40px;
+  padding: 7px;
+}
+
+svg {
+  overflow: visible;
+}
+
+.shape-selector svg path {
+  stroke: black;
+  stroke-width: 30px;
 }
