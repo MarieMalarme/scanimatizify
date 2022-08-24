@@ -273,3 +273,25 @@ shapes_paths.forEach((shape_path, index) => {
 })
 
 body.append(shape_selectors)
+
+// scanimation settings
+let frames_amount
+
+const scanimation_settings = document.createElement('div')
+scanimation_settings.id = 'scanimation-settings'
+const frames = document.createElement('div')
+const frames_label = document.createElement('label')
+frames_label.textContent = 'Frames'
+const frames_input = document.createElement('input')
+frames_input.type = 'number'
+frames_input.min = 2
+frames_input.max = 20
+frames_input.value = 4
+frames_input.addEventListener('click', (event) => {
+  frames_amount = event.target.value
+})
+
+frames.append(frames_input)
+frames.append(frames_label)
+scanimation_settings.append(frames)
+body.append(scanimation_settings)
