@@ -160,6 +160,8 @@ const path_selectors = Object.fromEntries(
       paused = true
       video_button.disabled = true
       document.querySelector(`.path-selector:not(#${id})`).disabled = true
+      Object.values(selected_paths).map((p) => p.classList.add('not-hoverable'))
+      selected_paths[selector].classList.add('selected')
     })
 
     return [selector, path_selector]
@@ -179,6 +181,8 @@ shapes_paths.forEach((shape_path, index) => {
   svg.setAttribute('viewBox', '0 0 1000 1000')
 
   const path = document.createElementNS(w3_url, 'path')
+  const id = `path-${index + 1}`
+  path.id = id
   path.setAttribute('fill', is_default_path ? 'black' : 'none')
   path.setAttribute('d', shape_path)
 
@@ -194,35 +198,66 @@ shapes_paths.forEach((shape_path, index) => {
 
   // update the morph path when clicking on a shape selector button
   svg.addEventListener('click', () => {
-    if (!path_to_set) return
-    // update ui to unselect the previously selected path & select the clicked one
-    selected_paths[path_to_set].setAttribute('fill', 'none')
-    path.setAttribute('fill', 'black')
-    selected_paths[path_to_set] = path
+    if (!path_to_set) {
+      const match_selected_path = Object.entries(selected_paths).find(
+        ([selector, path]) => path.id === id,
+      )
+      if (!match_selected_path) return
 
-    // update the morph path with the selected shape & the interpolator
-    interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
+      const selector = match_selected_path[0]
+      path_to_set = selector
 
-    // reset morph animation to start & relaunch animation
-    morph_step = 0
-    paused = false
-    video_button.textContent = 'Pause'
-    video_button.disabled = false
+      const path_selector = path_selectors[selector]
+      path_selector.classList.add('selected')
+      shape_selectors.classList.add('hoverable')
+      paused = true
+      video_button.disabled = true
+      document.querySelector(
+        `.path-selector:not(#${path_selector.id})`,
+      ).disabled = true
+      Object.values(selected_paths).map((p) => p.classList.add('not-hoverable'))
+      selected_paths[selector].classList.add('selected')
+    } else {
+      // prevent the other selected path to be selected twice
+      const other_selector = selectors.find((s) => s !== path_to_set)
+      const is_already_selected = selected_paths[other_selector].id === id
+      if (is_already_selected) return
 
-    // update ui when selection is done
-    const path_selector = path_selectors[path_to_set]
-    path_selector.classList.remove('selected')
-    shape_selectors.classList.remove('hoverable')
-    const other_selector = selectors.find((s) => s !== path_to_set)
-    const other_path_selector = path_selectors[other_selector]
-    other_path_selector.disabled = false
+      // update ui to unselect the previously selected path & select the clicked one
+      const path_selector = path_selectors[path_to_set]
+      path_selector.classList.remove('selected')
+      shape_selectors.classList.remove('hoverable')
+      Object.values(selected_paths).map((p) =>
+        p.classList.remove('not-hoverable'),
+      )
+      path_selectors[other_selector].disabled = false
+      selected_paths[other_selector].classList.remove('disabled')
+      selected_paths[path_to_set].classList.remove('selected')
+      selected_paths[path_to_set].setAttribute('fill', 'none')
+      path.setAttribute('fill', 'black')
+      selected_paths[path_to_set] = path
+      path_to_set = null
 
-    path_to_set = null
+      // update the morph path with the selected shape & the interpolator
+      interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
+
+      // reset morph animation to start & relaunch animation
+      morph_step = 0
+      paused = false
+      video_button.textContent = 'Pause'
+      video_button.disabled = false
+    }
   })
 
   // update the morph path when hovering on a shape selector button
   svg.addEventListener('mouseenter', () => {
     if (!path_to_set) return
+
+    // prevent the other selected path to be selected twice
+    const other_selector = selectors.find((s) => s !== path_to_set)
+    const is_already_selected = selected_paths[other_selector].id === id
+    if (is_already_selected) return
+
     // set ui to unselect the previously selected path & select the clicked one
     const path_selector = path_selectors[path_to_set]
     shape_selector.append(path_selector)

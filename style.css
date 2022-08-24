@@ -68,7 +68,7 @@ svg {
   stroke-width: 30px;
 }
 
-.hoverable div svg:hover path {
+.shape-selectors.hoverable div svg:hover path:not(.not-hoverable) {
   stroke: grey;
   fill: grey;
 }
@@ -78,9 +78,26 @@ svg {
   top: -30px;
   padding: 3px 10px;
   font-size: 11px;
+  color: rgb(140, 140, 140);
+  border-color: rgb(140, 140, 140);
 }
 
-.selected {
+button.selected {
   color: white;
   background: black;
+}
+
+.shape-selectors:not(.hoverable) .shape-selector:hover button {
+  color: black;
+  border-color: black;
+}
+
+.shape-selector svg path.not-hoverable {
+  fill: lightgrey;
+  stroke: lightgrey;
+}
+
+.shape-selector svg path.selected {
+  fill: black;
+  stroke: black;
 }
