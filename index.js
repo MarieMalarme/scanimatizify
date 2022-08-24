@@ -182,6 +182,8 @@ start_path_selector.addEventListener('click', () => {
   start_path_selector.style.background = set_start_path ? 'black' : 'white'
   start_path_selector.style.color = set_start_path ? 'white' : 'black'
   shape_selectors.classList.toggle('selectable')
+  paused = true
+  video_button.disabled = true
 })
 
 shapes_paths.forEach((shape_path, index) => {
@@ -204,25 +206,36 @@ shapes_paths.forEach((shape_path, index) => {
   // update the morph path when clicking on a shape selector button
   svg.addEventListener('click', () => {
     if (!set_start_path) return
-    // set ui to unselect the previously selected path & select the clicked one
+    // update ui to unselect the previously selected path & select the clicked one
     selected_path.setAttribute('fill', 'none')
     path.setAttribute('fill', 'black')
-    shape_selector.append(start_path_selector)
     selected_path = path
 
     // update the morph path with the selected shape & the interpolator
-    morph_path.setAttribute('d', shape_path)
-    morph_paths.start = shape_path
     interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
 
-    // reset morph animation to start
+    // reset morph animation to start & relaunch animation
     morph_step = 0
+    paused = false
+    video_button.textContent = 'Pause'
+    video_button.disabled = false
 
     // update ui when selection is done
     set_start_path = false
     start_path_selector.style.background = 'white'
     start_path_selector.style.color = 'black'
     shape_selectors.classList.toggle('selectable')
+  })
+
+  // update the morph path when hovering on a shape selector button
+  svg.addEventListener('mouseenter', () => {
+    if (!set_start_path) return
+    // set ui to unselect the previously selected path & select the clicked one
+    shape_selector.append(start_path_selector)
+
+    // update the morph path with the selected shape
+    morph_path.setAttribute('d', shape_path)
+    morph_paths.start = shape_path
   })
 
   svg.append(path)

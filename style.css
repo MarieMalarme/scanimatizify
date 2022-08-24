@@ -36,6 +36,11 @@ button {
   padding: 7px;
 }
 
+#video-button:disabled {
+  color: lightgrey;
+  border-color: lightgrey;
+}
+
 .shape-selectors {
   position: fixed;
   bottom: 30px;
