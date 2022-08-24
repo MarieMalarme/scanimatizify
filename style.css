@@ -36,7 +36,7 @@ button {
   padding: 7px;
 }
 
-#video-button:disabled {
+button:disabled {
   color: lightgrey;
   border-color: lightgrey;
 }
@@ -68,7 +68,7 @@ svg {
   stroke-width: 30px;
 }
 
-.selectable div svg:hover path {
+.hoverable div svg:hover path {
   stroke: grey;
   fill: grey;
 }
@@ -78,4 +78,9 @@ svg {
   top: -30px;
   padding: 3px 10px;
   font-size: 11px;
+}
+
+.selected {
+  color: white;
+  background: black;
 }

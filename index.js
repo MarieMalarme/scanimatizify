@@ -53,7 +53,8 @@ const shapes_paths = [
   'M489.56 17.32 c5.77 -23.15 14.92 -23.08 20.33 .16 l36.63 157.32 c20.1 82 133 142.17 214 118.59 l152.31 -43.79 c22.93 -6.59 27.65 1.57 10.48 18.15 L806.84 380.16 c-60.94 58.4 -60.94 181.69 0 240.08 l116.43 112.07 c17.19 16.55 12.54 24.55 -10.34 17.78 l-155.26 -46 c-81 -23.58 -191 39.51 -211.15 121.48l -36.61 156.98 c-5.43 23.23 -14.46 23.27 -20.08 .08 l-38.76 -159.92 c-20.1 -82 -108.93 -146.6 -190 -123 L87.23 750.28 C64.31 757 59.51 748.74 76.56 732 l117.08 -114.65 c60.94 -58.4 60.94 -181.69 0 -240.08 L77.13 267.38 c-17.36 -16.37 -12.78 -24.45 10.19 -18 l155.49 44 C323.85 317 431 253.88 451.07 171.91Z',
 ]
 
-let morph_paths = { start: shapes_paths[0], end: shapes_paths[1] }
+const default_paths = { start: shapes_paths[0], end: shapes_paths[20] }
+let morph_paths = { start: default_paths.start, end: default_paths.end }
 
 // functions
 const round = (number) => Math.round((number + Number.EPSILON) * 100) / 100
@@ -81,40 +82,9 @@ shape.className = 'shape'
 const svg = document.createElementNS(w3_url, 'svg')
 svg.setAttribute('viewBox', '0 0 1000 1000')
 
-// create a radial gradient fill
-// const defs = document.createElementNS(w3_url, 'defs')
-// const radial_gradient = document.createElementNS(w3_url, 'radialGradient')
-// const radial_gradient_id = `gradient`
-// radial_gradient.id = radial_gradient_id
-
-// // create the radial gradient stops
-// const stops_amount = 5
-// const stops = [
-//   [316, 62, 53],
-//   [354, 72, 41],
-//   [242, 90, 42],
-//   [127, 55, 75],
-//   [347, 71, 75],
-// ]
-// // const stops = [...Array(stops_amount).keys()]
-// // stops.forEach((index) => {
-// stops.forEach((hsl, index) => {
-//   const [hue, saturation, luminosity] = hsl
-//   const color = `hsl(${hue}, ${saturation}%, ${luminosity}%)`
-//   const stop = document.createElementNS(w3_url, 'stop')
-//   stop.setAttribute('offset', `${(index * 100) / stops_amount}%`)
-//   stop.setAttribute('stop-color', color)
-//   // stop.setAttribute('stop-color', random_color())
-//   radial_gradient.append(stop)
-// })
-
-// defs.append(radial_gradient)
-// svg.append(defs)
-
 // create the path
 const morph_path = document.createElementNS(w3_url, 'path')
 morph_path.setAttribute('d', morph_paths.start)
-// path.setAttribute('fill', `url(#${radial_gradient_id})`)
 morph_path.setAttribute('fill', 'blueviolet')
 
 // append all elements
@@ -168,25 +138,39 @@ video_button.addEventListener('click', () => {
 })
 
 // shapes select buttons
-let selected_path
-let set_start_path = false
+let selected_paths = { start: null, end: null }
+let path_to_set = null
 
 const shape_selectors = document.createElement('div')
 shape_selectors.className = 'shape-selectors'
 
-const start_path_selector = document.createElement('button')
-start_path_selector.className = 'path-selector'
-start_path_selector.textContent = 'Set start'
-start_path_selector.addEventListener('click', () => {
-  set_start_path = !set_start_path
-  start_path_selector.style.background = set_start_path ? 'black' : 'white'
-  start_path_selector.style.color = set_start_path ? 'white' : 'black'
-  shape_selectors.classList.toggle('selectable')
-  paused = true
-  video_button.disabled = true
-})
+const selectors = ['start', 'end']
+const path_selectors = Object.fromEntries(
+  selectors.map((selector) => {
+    const path_selector = document.createElement('button')
+    const id = `path-selector-${selector}`
+    path_selector.id = id
+    path_selector.className = 'path-selector'
+    path_selector.textContent = `Set ${selector}`
+    path_selector.addEventListener('click', () => {
+      if (path_to_set) return
+      path_to_set = selector
+      path_selector.classList.add('selected')
+      shape_selectors.classList.add('hoverable')
+      paused = true
+      video_button.disabled = true
+      document.querySelector(`.path-selector:not(#${id})`).disabled = true
+    })
+
+    return [selector, path_selector]
+  }),
+)
 
 shapes_paths.forEach((shape_path, index) => {
+  const is_default_start_path = shape_path === default_paths.start
+  const is_default_end_path = shape_path === default_paths.end
+  const is_default_path = is_default_start_path || is_default_end_path
+
   const shape_selector = document.createElement('div')
   shape_selector.className = 'shape-selector'
   shape_selector.style.width = `calc(${100 / shapes_paths.length}%)`
@@ -195,21 +179,26 @@ shapes_paths.forEach((shape_path, index) => {
   svg.setAttribute('viewBox', '0 0 1000 1000')
 
   const path = document.createElementNS(w3_url, 'path')
-  path.setAttribute('fill', !index ? 'black' : 'none')
+  path.setAttribute('fill', is_default_path ? 'black' : 'none')
   path.setAttribute('d', shape_path)
 
-  if (index === 0) {
-    selected_path = path
-    shape_selector.append(start_path_selector)
+  if (is_default_start_path) {
+    selected_paths.start = path
+    shape_selector.append(path_selectors.start)
+  }
+
+  if (is_default_end_path) {
+    selected_paths.end = path
+    shape_selector.append(path_selectors.end)
   }
 
   // update the morph path when clicking on a shape selector button
   svg.addEventListener('click', () => {
-    if (!set_start_path) return
+    if (!path_to_set) return
     // update ui to unselect the previously selected path & select the clicked one
-    selected_path.setAttribute('fill', 'none')
+    selected_paths[path_to_set].setAttribute('fill', 'none')
     path.setAttribute('fill', 'black')
-    selected_path = path
+    selected_paths[path_to_set] = path
 
     // update the morph path with the selected shape & the interpolator
     interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
@@ -221,21 +210,26 @@ shapes_paths.forEach((shape_path, index) => {
     video_button.disabled = false
 
     // update ui when selection is done
-    set_start_path = false
-    start_path_selector.style.background = 'white'
-    start_path_selector.style.color = 'black'
-    shape_selectors.classList.toggle('selectable')
+    const path_selector = path_selectors[path_to_set]
+    path_selector.classList.remove('selected')
+    shape_selectors.classList.remove('hoverable')
+    const other_selector = selectors.find((s) => s !== path_to_set)
+    const other_path_selector = path_selectors[other_selector]
+    other_path_selector.disabled = false
+
+    path_to_set = null
   })
 
   // update the morph path when hovering on a shape selector button
   svg.addEventListener('mouseenter', () => {
-    if (!set_start_path) return
+    if (!path_to_set) return
     // set ui to unselect the previously selected path & select the clicked one
-    shape_selector.append(start_path_selector)
+    const path_selector = path_selectors[path_to_set]
+    shape_selector.append(path_selector)
 
     // update the morph path with the selected shape
     morph_path.setAttribute('d', shape_path)
-    morph_paths.start = shape_path
+    morph_paths[path_to_set] = shape_path
   })
 
   svg.append(path)
