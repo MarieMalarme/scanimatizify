@@ -156,6 +156,7 @@ const buttons = document.createElement('div')
 buttons.id = 'buttons'
 
 const video_button = document.createElement('button')
+video_button.id = 'video-button'
 video_button.textContent = 'Play'
 
 buttons.append(video_button)
@@ -168,9 +169,20 @@ video_button.addEventListener('click', () => {
 
 // shapes select buttons
 let selected_path
+let set_start_path = false
 
 const shape_selectors = document.createElement('div')
 shape_selectors.className = 'shape-selectors'
+
+const start_path_selector = document.createElement('button')
+start_path_selector.className = 'path-selector'
+start_path_selector.textContent = 'Set start'
+start_path_selector.addEventListener('click', () => {
+  set_start_path = !set_start_path
+  start_path_selector.style.background = set_start_path ? 'black' : 'white'
+  start_path_selector.style.color = set_start_path ? 'white' : 'black'
+  shape_selectors.classList.toggle('selectable')
+})
 
 shapes_paths.forEach((shape_path, index) => {
   const shape_selector = document.createElement('div')
@@ -186,13 +198,16 @@ shapes_paths.forEach((shape_path, index) => {
 
   if (index === 0) {
     selected_path = path
+    shape_selector.append(start_path_selector)
   }
 
   // update the morph path when clicking on a shape selector button
   svg.addEventListener('click', () => {
+    if (!set_start_path) return
     // set ui to unselect the previously selected path & select the clicked one
     selected_path.setAttribute('fill', 'none')
     path.setAttribute('fill', 'black')
+    shape_selector.append(start_path_selector)
     selected_path = path
 
     // update the morph path with the selected shape & the interpolator
@@ -202,6 +217,12 @@ shapes_paths.forEach((shape_path, index) => {
 
     // reset morph animation to start
     morph_step = 0
+
+    // update ui when selection is done
+    set_start_path = false
+    start_path_selector.style.background = 'white'
+    start_path_selector.style.color = 'black'
+    shape_selectors.classList.toggle('selectable')
   })
 
   svg.append(path)
