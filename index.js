@@ -333,4 +333,16 @@ direction.append(direction_input)
 direction.append(direction_label)
 scanimation_settings.append(direction)
 
+// button to generate the scanimation grid & sliced image
+const scanimate_button = document.createElement('button')
+scanimate_button.id = 'scanimate-button'
+scanimate_button.textContent = 'Scanimate!'
+scanimate_button.addEventListener('click', () => {
+  console.log('scanimating!')
+  console.log('frames_amount', frames_amount)
+  console.log('slice_size', slice_size)
+  console.log('animation_direction', animation_direction)
+})
+scanimation_settings.append(scanimate_button)
+
 body.append(scanimation_settings)
