@@ -333,16 +333,43 @@ direction.append(direction_input)
 direction.append(direction_label)
 scanimation_settings.append(direction)
 
+const canvases = document.createElement('div')
+canvases.id = 'canvases'
+body.append(canvases)
+
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
 scanimate_button.addEventListener('click', () => {
-  console.log('scanimating!')
-  console.log('frames_amount', frames_amount)
-  console.log('slice_size', slice_size)
-  console.log('animation_direction', animation_direction)
-})
-scanimation_settings.append(scanimate_button)
+  // remove previous canvases
+  const previous_canvases = [...canvases.children]
+  previous_canvases.forEach((canvas) => canvas.remove())
 
+  console.log('scanimating...')
+
+  // set interpolator with custom curves smoothness
+  const { start, end } = morph_paths
+  const smoothness = { maxSegmentLength: 5 }
+  const interpolator = flubber.interpolate(start, end, smoothness)
+
+  // create a canvas for each frame
+  for (let i = 0; i < frames_amount; i++) {
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
+    // set width & height to fit the svg viewBox dimensions
+    canvas.width = 1000
+    canvas.height = 1000
+    canvas.style.width = `${100 / frames_amount}vw`
+    canvas.style.height = `${100 / frames_amount}vw`
+
+    // draw the corresponding morph steph path
+    const path = new Path2D(interpolator(i / (frames_amount - 1)))
+    context.fill(path)
+    canvases.append(canvas)
+  }
+})
+
+scanimation_settings.append(scanimate_button)
 body.append(scanimation_settings)
