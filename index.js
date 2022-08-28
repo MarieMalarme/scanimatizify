@@ -277,6 +277,7 @@ body.append(shape_selectors)
 // scanimation settings
 let frames_amount = 4
 let slice_size = 2
+let curves_smoothness = 5
 const animation_directions = ['Left', 'Right', 'Up', 'Down']
 let animation_direction = animation_directions[0]
 
@@ -315,6 +316,22 @@ slice.append(slice_input)
 slice.append(slice_label)
 scanimation_settings.append(slice)
 
+// input to set smoothness of curves for morphing
+const smoothness = document.createElement('div')
+const smoothness_label = document.createElement('label')
+smoothness_label.textContent = 'Curve smoothness'
+const smoothness_input = document.createElement('input')
+smoothness_input.type = 'number'
+smoothness_input.min = 1
+smoothness_input.max = 10
+smoothness_input.value = curves_smoothness
+smoothness_input.addEventListener('click', (event) => {
+  curves_smoothness = event.target.value
+})
+smoothness.append(smoothness_input)
+smoothness.append(smoothness_label)
+scanimation_settings.append(smoothness)
+
 // input to set direction of the animation
 const direction = document.createElement('div')
 const direction_label = document.createElement('label')
@@ -350,7 +367,7 @@ scanimate_button.addEventListener('click', () => {
 
   // set interpolator with custom curves smoothness
   const { start, end } = morph_paths
-  const smoothness = { maxSegmentLength: 5 }
+  const smoothness = { maxSegmentLength: Number(curves_smoothness) }
   const interpolator = flubber.interpolate(start, end, smoothness)
 
   // create a canvas for each frame
