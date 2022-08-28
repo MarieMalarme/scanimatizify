@@ -57,6 +57,7 @@ const default_paths = { start: shapes_paths[0], end: shapes_paths[20] }
 let morph_paths = { start: default_paths.start, end: default_paths.end }
 
 // functions
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 const round = (number) => Math.round((number + Number.EPSILON) * 100) / 100
 
 const random_int = (min, max) => {
@@ -350,6 +351,11 @@ direction.append(direction_input)
 direction.append(direction_label)
 scanimation_settings.append(direction)
 
+const loader = document.createElement('div')
+loader.id = 'loader'
+loader.textContent = 'Scanimating...'
+body.append(loader)
+
 const canvases = document.createElement('div')
 canvases.id = 'canvases'
 body.append(canvases)
@@ -358,12 +364,16 @@ body.append(canvases)
 const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
-scanimate_button.addEventListener('click', () => {
+scanimate_button.addEventListener('click', async () => {
   // remove previous canvases
   const previous_canvases = [...canvases.children]
   previous_canvases.forEach((canvas) => canvas.remove())
 
-  console.log('scanimating...')
+  // display the loader
+  loader.classList.add('visible')
+
+  // re-render DOM before starting to load interpolator
+  await sleep(10)
 
   // set interpolator with custom curves smoothness
   const { start, end } = morph_paths
@@ -386,6 +396,9 @@ scanimate_button.addEventListener('click', () => {
     context.fill(path)
     canvases.append(canvas)
   }
+
+  // remove the loader
+  loader.classList.remove('visible')
 })
 
 scanimation_settings.append(scanimate_button)

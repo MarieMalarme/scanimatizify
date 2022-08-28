@@ -152,3 +152,13 @@ label {
   align-items: center;
   justify-content: center;
 }
+
+#loader {
+  position: absolute;
+  display: none;
+  font-size: 5vw;
+}
+
+#loader.visible {
+  display: block;
+}
