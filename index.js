@@ -291,11 +291,11 @@ const frames_label = document.createElement('label')
 frames_label.textContent = 'Frames'
 const frames_input = document.createElement('input')
 frames_input.type = 'number'
-frames_input.min = 2
+frames_input.min = 3
 frames_input.max = 20
 frames_input.value = frames_amount
 frames_input.addEventListener('click', (event) => {
-  frames_amount = event.target.value
+  frames_amount = Number(event.target.value)
 })
 frames.append(frames_input)
 frames.append(frames_label)
@@ -308,10 +308,10 @@ slice_label.textContent = 'Slice size'
 const slice_input = document.createElement('input')
 slice_input.type = 'number'
 slice_input.min = 1
-slice_input.max = 5
+slice_input.max = 20
 slice_input.value = slice_size
 slice_input.addEventListener('click', (event) => {
-  slice_size = event.target.value
+  slice_size = Number(event.target.value)
 })
 slice.append(slice_input)
 slice.append(slice_label)
@@ -327,7 +327,7 @@ smoothness_input.min = 1
 smoothness_input.max = 10
 smoothness_input.value = curves_smoothness
 smoothness_input.addEventListener('click', (event) => {
-  curves_smoothness = event.target.value
+  curves_smoothness = Number(event.target.value)
 })
 smoothness.append(smoothness_input)
 smoothness.append(smoothness_label)
