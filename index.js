@@ -356,18 +356,31 @@ loader.id = 'loader'
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
-const canvases = document.createElement('div')
-canvases.id = 'canvases'
-body.append(canvases)
+// set render canvas to draw the scanimation image result
+const render_canvas = document.createElement('canvas')
+const render_context = render_canvas.getContext('2d')
+render_canvas.id = 'render-canvas'
+render_canvas.width = 1000 // width fitting the svg viewBox width
+render_canvas.height = 1000 // height fitting the svg viewBox height
+render_canvas.style.width = '1000px' // to do: add as customisable setting in the panel
+render_canvas.style.height = '1000px' // to do: add as customisable setting in the panel
+body.append(render_canvas)
+
+// set frame canvas to draw each frame of the animation
+// and copy paste the selected slices on the render canvas
+const frame_canvas = document.createElement('canvas')
+const frame_context = frame_canvas.getContext('2d')
+frame_canvas.width = 1000 // width fitting the svg viewBox width
+frame_canvas.height = 1000 // height fitting the svg viewBox height
 
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
 scanimate_button.addEventListener('click', async () => {
-  // remove previous canvases
-  const previous_canvases = [...canvases.children]
-  previous_canvases.forEach((canvas) => canvas.remove())
+  // clear final canvas to redraw if already drawn on
+  render_context.clearRect(0, 0, 1000, 1000)
+  render_canvas.style.display = 'block'
 
   // display the loader
   loader.classList.add('visible')
@@ -380,25 +393,49 @@ scanimate_button.addEventListener('click', async () => {
   const smoothness = { maxSegmentLength: Number(curves_smoothness) }
   const interpolator = flubber.interpolate(start, end, smoothness)
 
+  const is_horizontal_animation =
+    animation_direction === 'Up' || animation_direction === 'Down'
+
+  // set slice variables according to animation direction
+  const slice_height = is_horizontal_animation ? slice_size : 1000
+  const slice_width = is_horizontal_animation ? 1000 : slice_size
+
+  // slice the image in equal sections according to the settings
+  const slices_amount = 1000 / slice_size
+
   // create a canvas for each frame
-  for (let i = 0; i < frames_amount; i++) {
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
-
-    // set width & height to fit the svg viewBox dimensions
-    canvas.width = 1000
-    canvas.height = 1000
-    canvas.style.width = `${100 / frames_amount}vw`
-    canvas.style.height = `${100 / frames_amount}vw`
-
+  for (let frame = 0; frame < frames_amount; frame++) {
     // draw the corresponding morph steph path
-    const path = new Path2D(interpolator(i / (frames_amount - 1)))
-    context.fill(path)
-    canvases.append(canvas)
+    const frame_step = frame / (frames_amount - 1)
+    const frame_path = new Path2D(interpolator(frame_step))
+    frame_context.fill(frame_path)
+
+    for (
+      let slice = frame; // first slice to display starts from the current frame
+      slice < slices_amount;
+      slice = slice + frames_amount // jump to next slice that has to be drawn, ignore slices in between that will be the other frames' slices
+    ) {
+      const start_x = is_horizontal_animation ? 0 : slice * slice_size
+      const start_y = is_horizontal_animation ? slice * slice_size : 0
+      const coords = [start_x, start_y, slice_width, slice_height]
+
+      // copy the selected slice from the current frame canvas
+      const pixels = frame_context.getImageData(...coords)
+      // paste the selected slice to the final canvas
+      render_context.putImageData(pixels, start_x, start_y)
+    }
+
+    // clear the frame canvas to draw next frame
+    frame_context.clearRect(0, 0, 1000, 1000)
   }
 
   // remove the loader
   loader.classList.remove('visible')
+
+  // hide the animation playground
+  shape.style.opacity = 0
+  buttons.style.opacity = 0
+  shape_selectors.style.opacity = 0
 })
 
 scanimation_settings.append(scanimate_button)
