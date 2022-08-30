@@ -30,11 +30,21 @@ button {
   background: white;
   border-radius: 20px;
   border: solid 1px black;
+  cursor: pointer;
 }
 
 #video-button {
-  width: 90px;
+  width: 130px;
   padding: 7px;
+}
+
+#back-button {
+  width: 140px;
+  padding: 7px;
+  top: 30px;
+  right: 40px;
+  position: fixed;
+  display: none;
 }
 
 button:disabled {

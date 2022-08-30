@@ -128,14 +128,14 @@ buttons.id = 'buttons'
 
 const video_button = document.createElement('button')
 video_button.id = 'video-button'
-video_button.textContent = 'Play'
+video_button.textContent = 'Play animation'
 
 buttons.append(video_button)
 body.append(buttons)
 
 video_button.addEventListener('click', () => {
   paused = !paused
-  video_button.textContent = paused ? 'Play' : 'Pause'
+  video_button.textContent = paused ? 'Play animation' : 'Pause animation'
 })
 
 // shapes select buttons
@@ -245,7 +245,7 @@ shapes_paths.forEach((shape_path, index) => {
       // reset morph animation to start & relaunch animation
       morph_step = 0
       paused = false
-      video_button.textContent = 'Pause'
+      video_button.textContent = 'Pause animation'
       video_button.disabled = false
     }
   })
@@ -378,6 +378,10 @@ const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
 scanimate_button.addEventListener('click', async () => {
+  // pause video
+  paused = true
+  video_button.textContent = 'Play animation'
+
   // clear final canvas to redraw if already drawn on
   render_context.clearRect(0, 0, 1000, 1000)
   render_canvas.style.display = 'block'
@@ -390,7 +394,7 @@ scanimate_button.addEventListener('click', async () => {
 
   // set interpolator with custom curves smoothness
   const { start, end } = morph_paths
-  const smoothness = { maxSegmentLength: Number(curves_smoothness) }
+  const smoothness = { maxSegmentLength: curves_smoothness }
   const interpolator = flubber.interpolate(start, end, smoothness)
 
   const is_horizontal_animation =
@@ -433,9 +437,28 @@ scanimate_button.addEventListener('click', async () => {
   loader.classList.remove('visible')
 
   // hide the animation playground
-  shape.style.opacity = 0
-  buttons.style.opacity = 0
-  shape_selectors.style.opacity = 0
+  shape.style.display = 'none'
+  buttons.style.display = 'none'
+  shape_selectors.style.display = 'none'
+
+  back_button.style.display = 'block'
+})
+
+const back_button = document.createElement('button')
+back_button.id = 'back-button'
+back_button.textContent = 'Back to animation'
+
+body.append(back_button)
+
+back_button.addEventListener('click', () => {
+  // hide scanimation render
+  render_canvas.style.display = 'none'
+  back_button.style.display = 'none'
+
+  // show the animation playground
+  shape.style.display = 'flex'
+  buttons.style.display = 'flex'
+  shape_selectors.style.display = 'flex'
 })
 
 scanimation_settings.append(scanimate_button)
