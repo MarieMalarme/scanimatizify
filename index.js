@@ -365,11 +365,23 @@ body.append(loader)
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
+render_canvas.className = 'displayable-canvas'
 render_canvas.width = 1000 // width fitting the svg viewBox width
 render_canvas.height = 1000 // height fitting the svg viewBox height
 render_canvas.style.width = '1000px' // to do: add as customisable setting in the panel
 render_canvas.style.height = '1000px' // to do: add as customisable setting in the panel
 body.append(render_canvas)
+
+// set grid canvas to draw the grid to animate the image result
+const grid_canvas = document.createElement('canvas')
+const grid_context = grid_canvas.getContext('2d')
+grid_canvas.id = 'grid-canvas'
+grid_canvas.className = 'displayable-canvas'
+grid_canvas.width = 1000 // width fitting the svg viewBox width
+grid_canvas.height = 1000 // height fitting the svg viewBox height
+grid_canvas.style.width = '1000px' // to do: add as customisable setting in the panel
+grid_canvas.style.height = '1000px' // to do: add as customisable setting in the panel
+body.append(grid_canvas)
 
 // set frame canvas to draw each frame of the animation
 // and copy paste the selected slices on the render canvas
@@ -387,9 +399,11 @@ scanimate_button.addEventListener('click', async () => {
   paused = true
   video_button.textContent = 'Play animation'
 
-  // clear final canvas to redraw if already drawn on
+  // clear render & grid canvases to redraw if already drawn on
   render_context.clearRect(0, 0, 1000, 1000)
   render_canvas.style.display = 'block'
+  grid_context.clearRect(0, 0, 1000, 1000)
+  grid_canvas.style.display = 'block'
 
   // display the loader
   loader.classList.add('visible')
@@ -412,18 +426,17 @@ scanimate_button.addEventListener('click', async () => {
   // slice the image in equal sections according to the settings
   const slices_amount = 1000 / slice_size
 
-  // create a canvas for each frame
+  // create a canvas for each frame to slice the image
   for (let frame = 0; frame < frames_amount; frame++) {
     // draw the corresponding morph steph path
     const frame_step = frame / (frames_amount - 1)
     const frame_path = new Path2D(interpolator(frame_step))
     frame_context.fill(frame_path)
 
-    for (
-      let slice = frame; // first slice to display starts from the current frame
-      slice < slices_amount;
-      slice = slice + frames_amount // jump to next slice that has to be drawn, ignore slices in between that will be the other frames' slices
-    ) {
+    // first slice to display starts from the current frame
+    // then jump to next slice that has to be drawn:
+    // ignore slices in between that will be the other frames' slices
+    for (let slice = frame; slice < slices_amount; slice += frames_amount) {
       const start_x = is_horizontal_animation ? 0 : slice * slice_size
       const start_y = is_horizontal_animation ? slice * slice_size : 0
       const coords = [start_x, start_y, slice_width, slice_height]
@@ -436,6 +449,21 @@ scanimate_button.addEventListener('click', async () => {
 
     // clear the frame canvas to draw next frame
     frame_context.clearRect(0, 0, 1000, 1000)
+  }
+
+  // create the grid
+  for (let hider = 0; hider < slices_amount; hider += frames_amount) {
+    const start_x = is_horizontal_animation ? 0 : hider * slice_size
+    const start_y = is_horizontal_animation ? hider * slice_size : 0
+
+    const hider_size = slice_size * (frames_amount - 1)
+    const hider_height = is_horizontal_animation ? hider_size : 1000
+    const hider_width = is_horizontal_animation ? 1000 : hider_size
+
+    const coords = [start_x, start_y, hider_width, hider_height]
+
+    // fill the selected slice to the grid canvas
+    grid_context.fillRect(...coords)
   }
 
   // remove the loader
@@ -458,6 +486,7 @@ body.append(back_button)
 back_button.addEventListener('click', () => {
   // hide scanimation render
   render_canvas.style.display = 'none'
+  grid_canvas.style.display = 'none'
   back_button.style.display = 'none'
 
   // show the animation playground

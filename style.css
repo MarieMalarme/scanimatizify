@@ -155,7 +155,7 @@ label {
   color: white;
 }
 
-#render-canvas {
+.displayable-canvas {
   display: none;
   position: absolute;
 }
