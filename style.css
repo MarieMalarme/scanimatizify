@@ -82,6 +82,7 @@ svg {
 .shape-selectors.hoverable div svg:hover path:not(.not-hoverable) {
   stroke: grey;
   fill: grey;
+  cursor: pointer;
 }
 
 .path-selector {
@@ -108,9 +109,10 @@ button.selected {
   stroke: lightgrey;
 }
 
-.shape-selector svg path.selected {
+.shape-selector svg path.selected:not(.not-hoverable) {
   fill: black;
   stroke: black;
+  cursor: pointer;
 }
 
 #scanimation-settings {

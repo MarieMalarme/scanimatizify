@@ -187,6 +187,10 @@ shapes_paths.forEach((shape_path, index) => {
   path.setAttribute('fill', is_default_path ? 'black' : 'none')
   path.setAttribute('d', shape_path)
 
+  if (is_default_path) {
+    path.classList.add('selected')
+  }
+
   if (is_default_start_path) {
     selected_paths.start = path
     shape_selector.append(path_selectors.start)
@@ -236,6 +240,7 @@ shapes_paths.forEach((shape_path, index) => {
       selected_paths[path_to_set].classList.remove('selected')
       selected_paths[path_to_set].setAttribute('fill', 'none')
       path.setAttribute('fill', 'black')
+      path.classList.add('selected')
       selected_paths[path_to_set] = path
       path_to_set = null
 
