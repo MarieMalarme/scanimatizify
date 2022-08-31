@@ -302,8 +302,13 @@ let curves_smoothness = 5
 const animation_directions = ['Horizontal', 'Vertical']
 let animation_direction = animation_directions[0]
 
+const controls_panel = document.createElement('div')
+controls_panel.id = 'controls-panel'
+body.append(controls_panel)
+
 const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
+controls_panel.append(scanimation_settings)
 
 // input to set number of frames of the animation
 const frames = document.createElement('div')
@@ -475,8 +480,18 @@ scanimate_button.addEventListener('click', async () => {
   grid_slider.max = slice_size * 10
   grid_canvas.style.transform = `translate(0px)`
 
-  // display the loader
+  // disable download buttons
+  download_render_button.disabled = true
+  download_grid_button.disabled = true
+
+  // hide scanimation render
+  grid_slider.classList.add('hidden')
+  grid_label.classList.add('hidden')
+  hide_grid_button.classList.add('hidden')
+
+  // display the loader & disable pointer events
   loader.classList.remove('hidden')
+  body.style.pointerEvents = 'none'
 
   // re-render DOM before starting to load interpolator
   await sleep(10)
@@ -538,8 +553,9 @@ scanimate_button.addEventListener('click', async () => {
     grid_context.fillRect(...coords)
   }
 
-  // remove the loader
+  // remove the loader & enable pointer events
   loader.classList.add('hidden')
+  body.style.pointerEvents = 'all'
 
   // hide the animation playground
   shape.classList.add('hidden')
@@ -552,7 +568,25 @@ scanimate_button.addEventListener('click', async () => {
   grid_label.classList.remove('hidden')
   hide_grid_button.classList.remove('hidden')
   hide_grid_button.textContent = 'Hide grid'
+
+  // enable download buttons
+  download_render_button.disabled = false
+  download_grid_button.disabled = false
 })
+
+scanimation_settings.append(scanimate_button)
+
+const download_render_button = document.createElement('button')
+download_render_button.className = 'download'
+download_render_button.disabled = true
+download_render_button.textContent = 'Download render'
+controls_panel.append(download_render_button)
+
+const download_grid_button = document.createElement('button')
+download_grid_button.className = 'download'
+download_grid_button.disabled = true
+download_grid_button.textContent = 'Download grid'
+controls_panel.append(download_grid_button)
 
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
@@ -574,6 +608,3 @@ back_button.addEventListener('click', () => {
   video_button.classList.remove('hidden')
   shape_selectors.classList.remove('hidden')
 })
-
-scanimation_settings.append(scanimate_button)
-body.append(scanimation_settings)
