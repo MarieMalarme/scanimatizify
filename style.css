@@ -172,7 +172,30 @@ label {
 
 #grid-slider {
   position: fixed;
-  bottom: 60px;
+  bottom: 50px;
   display: none;
   width: 1000px;
+}
+
+input[type='range']:focus {
+  outline: none;
+}
+
+input[type='range'] {
+  appearance: none;
+  width: 150px;
+  height: 38px;
+  outline: none;
+  border-radius: 30px;
+  cursor: pointer;
+  padding: 7px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  background: black;
+  border-radius: 30px;
+  outline: none;
 }
