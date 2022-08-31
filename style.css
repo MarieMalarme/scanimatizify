@@ -13,7 +13,7 @@ body {
   justify-content: center;
 }
 
-.shape {
+#shape {
   max-height: 80vh;
   width: 55vw;
   max-width: 80vh;
@@ -33,9 +33,14 @@ button {
   cursor: pointer;
 }
 
-#video-button {
+#buttons button {
   width: 130px;
   padding: 7px;
+}
+
+.hidden,
+div.hidden {
+  display: none;
 }
 
 #back-button {
@@ -44,7 +49,6 @@ button {
   top: 30px;
   right: 40px;
   position: fixed;
-  display: none;
 }
 
 button:disabled {
@@ -157,24 +161,17 @@ label {
 }
 
 .displayable-canvas {
-  display: none;
   position: absolute;
 }
 
 #loader {
   position: absolute;
-  display: none;
   font-size: 5vw;
-}
-
-#loader.visible {
-  display: block;
 }
 
 #grid-slider {
   position: fixed;
   bottom: 80px;
-  display: none;
   width: 1000px;
 }
 
@@ -184,7 +181,6 @@ input[type='range']:focus {
 
 input[type='range'] {
   appearance: none;
-  width: 150px;
   height: 38px;
   outline: none;
   border-radius: 30px;
@@ -204,5 +200,4 @@ input[type='range']::-webkit-slider-thumb {
 #grid-label {
   position: absolute;
   bottom: 55px;
-  display: none;
 }

@@ -77,8 +77,7 @@ const random_color = () => {
 // set up the html elements
 // create the container
 const shape = document.createElement('div')
-shape.id = `shape`
-shape.className = 'shape'
+shape.id = 'shape'
 
 // create the svg shape
 const svg = document.createElementNS(w3_url, 'svg')
@@ -137,6 +136,21 @@ body.append(buttons)
 video_button.addEventListener('click', () => {
   paused = !paused
   video_button.textContent = paused ? 'Play animation' : 'Pause animation'
+})
+
+const hide_grid_button = document.createElement('button')
+hide_grid_button.id = 'hide-grid-button'
+hide_grid_button.classList.add('hidden')
+hide_grid_button.textContent = 'Hide grid'
+
+buttons.append(hide_grid_button)
+body.append(buttons)
+
+hide_grid_button.addEventListener('click', () => {
+  const is_grid_hidden = grid_canvas.classList.toggle('hidden')
+  hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
+  grid_slider.classList.toggle('hidden')
+  grid_label.classList.toggle('hidden')
 })
 
 // shapes select buttons
@@ -359,6 +373,7 @@ scanimation_settings.append(direction)
 
 const loader = document.createElement('div')
 loader.id = 'loader'
+loader.classList.add('hidden')
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
@@ -375,7 +390,7 @@ const grid_display_size = render_display_size + render_display_size * grid_inc
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
-render_canvas.className = 'displayable-canvas'
+render_canvas.className = 'displayable-canvas hidden'
 render_canvas.width = render_export_size // width fitting the svg viewBox width
 render_canvas.height = render_export_size // height fitting the svg viewBox height
 render_canvas.style.width = `${render_display_size}vh` // to do: add as customisable setting in the panel
@@ -397,6 +412,7 @@ body.append(grid_canvas)
 // and have an overview of the animation
 const grid_slider = document.createElement('input')
 grid_slider.id = 'grid-slider'
+grid_slider.classList.add('hidden')
 grid_slider.type = 'range'
 grid_slider.min = -(slice_size * 10)
 grid_slider.max = slice_size * 10
@@ -405,6 +421,7 @@ grid_slider.step = slice_size / 10
 
 const grid_label = document.createElement('label')
 grid_label.id = 'grid-label'
+grid_label.classList.add('hidden')
 grid_label.textContent = 'Slide here or scroll to move the grid & animate!'
 body.append(grid_label)
 
@@ -446,19 +463,20 @@ scanimate_button.addEventListener('click', async () => {
 
   // clear render & grid canvases to redraw if already drawn on
   render_context.clearRect(0, 0, render_export_size, render_export_size)
-  render_canvas.style.display = 'block'
+  render_canvas.classList.remove('hidden')
   grid_context.clearRect(0, 0, grid_export_size, grid_export_size)
-  grid_canvas.style.display = 'block'
+  grid_canvas.classList.remove('hidden')
 
-  // reset grid slider on new scanimation
+  // reset grid slider & position on new scanimation
   translate_grid = 0
   grid_slider.value = 0
   grid_slider.step = slice_size / 10
   grid_slider.min = -(slice_size * 10)
   grid_slider.max = slice_size * 10
+  grid_canvas.style.transform = `translate(0px)`
 
   // display the loader
-  loader.classList.add('visible')
+  loader.classList.remove('hidden')
 
   // re-render DOM before starting to load interpolator
   await sleep(10)
@@ -521,16 +539,19 @@ scanimate_button.addEventListener('click', async () => {
   }
 
   // remove the loader
-  loader.classList.remove('visible')
+  loader.classList.add('hidden')
 
   // hide the animation playground
-  shape.style.display = 'none'
-  buttons.style.display = 'none'
-  shape_selectors.style.display = 'none'
+  shape.classList.add('hidden')
+  video_button.classList.add('hidden')
+  shape_selectors.classList.add('hidden')
 
-  grid_slider.style.display = 'block'
-  grid_label.style.display = 'block'
-  back_button.style.display = 'block'
+  // show the scanimation render
+  back_button.classList.remove('hidden')
+  grid_slider.classList.remove('hidden')
+  grid_label.classList.remove('hidden')
+  hide_grid_button.classList.remove('hidden')
+  hide_grid_button.textContent = 'Hide grid'
 })
 
 const back_button = document.createElement('button')
@@ -541,16 +562,17 @@ body.append(back_button)
 
 back_button.addEventListener('click', () => {
   // hide scanimation render
-  render_canvas.style.display = 'none'
-  grid_canvas.style.display = 'none'
-  back_button.style.display = 'none'
-  grid_slider.style.display = 'none'
-  grid_label.style.display = 'none'
+  back_button.classList.add('hidden')
+  render_canvas.classList.add('hidden')
+  grid_canvas.classList.add('hidden')
+  hide_grid_button.classList.add('hidden')
+  grid_slider.classList.add('hidden')
+  grid_label.classList.add('hidden')
 
   // show the animation playground
-  shape.style.display = 'flex'
-  buttons.style.display = 'flex'
-  shape_selectors.style.display = 'flex'
+  shape.classList.remove('hidden')
+  video_button.classList.remove('hidden')
+  shape_selectors.classList.remove('hidden')
 })
 
 scanimation_settings.append(scanimate_button)
