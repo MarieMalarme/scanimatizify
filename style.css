@@ -169,3 +169,10 @@ label {
 #loader.visible {
   display: block;
 }
+
+#grid-slider {
+  position: fixed;
+  bottom: 60px;
+  display: none;
+  width: 1000px;
+}

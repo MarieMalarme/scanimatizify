@@ -1,6 +1,7 @@
 // variables
-const { body } = document
 const w3_url = 'http://www.w3.org/2000/svg'
+const { body } = document
+body.style.overflow = 'hidden'
 
 const shapes_paths = [
   // star 6 branches
@@ -361,15 +362,24 @@ loader.id = 'loader'
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
+// size of the render canvas
+const render_export_size = 1000 // in px to be exported
+const render_display_size = 70 // in vh to be displayed on the page
+
+// make the grid 15% bigger than the canvas to move it around
+const grid_inc = 0.15
+const grid_export_size = render_export_size + render_export_size * grid_inc
+const grid_display_size = render_display_size + render_display_size * grid_inc
+
 // set render canvas to draw the scanimation image result
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas'
-render_canvas.width = 1000 // width fitting the svg viewBox width
-render_canvas.height = 1000 // height fitting the svg viewBox height
-render_canvas.style.width = '1000px' // to do: add as customisable setting in the panel
-render_canvas.style.height = '1000px' // to do: add as customisable setting in the panel
+render_canvas.width = render_export_size // width fitting the svg viewBox width
+render_canvas.height = render_export_size // height fitting the svg viewBox height
+render_canvas.style.width = `${render_display_size}vh` // to do: add as customisable setting in the panel
+render_canvas.style.height = `${render_display_size}vh` // to do: add as customisable setting in the panel
 body.append(render_canvas)
 
 // set grid canvas to draw the grid to animate the image result
@@ -377,18 +387,50 @@ const grid_canvas = document.createElement('canvas')
 const grid_context = grid_canvas.getContext('2d')
 grid_canvas.id = 'grid-canvas'
 grid_canvas.className = 'displayable-canvas'
-grid_canvas.width = 1000 // width fitting the svg viewBox width
-grid_canvas.height = 1000 // height fitting the svg viewBox height
-grid_canvas.style.width = '1000px' // to do: add as customisable setting in the panel
-grid_canvas.style.height = '1000px' // to do: add as customisable setting in the panel
+grid_canvas.width = grid_export_size // width fitting the svg viewBox width + 15%
+grid_canvas.height = grid_export_size // height fitting the svg viewBox height + 15%
+grid_canvas.style.width = `${grid_display_size}vh` // to do: add as customisable setting in the panel
+grid_canvas.style.height = `${grid_display_size}vh` // to do: add as customisable setting in the panel
 body.append(grid_canvas)
+
+// create a grid slider to move the grid on top of the scanimation image
+// and have an overview of the animation
+const grid_slider = document.createElement('input')
+grid_slider.id = 'grid-slider'
+grid_slider.type = 'range'
+grid_slider.min = -(slice_size * 10)
+grid_slider.max = slice_size * 10
+grid_slider.value = 0
+grid_slider.step = slice_size / 10
+
+let translate_grid = 0
+
+// move the grid with the slider
+grid_slider.addEventListener('input', (event) => {
+  translate_grid = Number(event.target.value)
+  const axis =
+    animation_direction === 'Up' || animation_direction === 'Down' ? 'Y' : 'X'
+  grid_canvas.style.transform = `translate${axis}(${translate_grid}px)`
+})
+
+// move the grid on scroll
+grid_canvas.addEventListener('mousewheel', (event) => {
+  const step = Number(grid_slider.step)
+  const inc = event.deltaY < 0 ? -step : step
+  translate_grid += inc
+  const axis =
+    animation_direction === 'Up' || animation_direction === 'Down' ? 'Y' : 'X'
+  grid_canvas.style.transform = `translate${axis}(${translate_grid}px)`
+  grid_slider.value = translate_grid
+})
+body.append(grid_slider)
 
 // set frame canvas to draw each frame of the animation
 // and copy paste the selected slices on the render canvas
 const frame_canvas = document.createElement('canvas')
 const frame_context = frame_canvas.getContext('2d')
-frame_canvas.width = 1000 // width fitting the svg viewBox width
-frame_canvas.height = 1000 // height fitting the svg viewBox height
+frame_canvas.width = render_export_size // width fitting the svg viewBox width
+frame_canvas.height = render_export_size // height fitting the svg viewBox height
 
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
@@ -400,10 +442,17 @@ scanimate_button.addEventListener('click', async () => {
   video_button.textContent = 'Play animation'
 
   // clear render & grid canvases to redraw if already drawn on
-  render_context.clearRect(0, 0, 1000, 1000)
+  render_context.clearRect(0, 0, render_export_size, render_export_size)
   render_canvas.style.display = 'block'
-  grid_context.clearRect(0, 0, 1000, 1000)
+  grid_context.clearRect(0, 0, grid_export_size, grid_export_size)
   grid_canvas.style.display = 'block'
+
+  // reset grid slider on new scanimation
+  translate_grid = 0
+  grid_slider.value = 0
+  grid_slider.step = slice_size / 10
+  grid_slider.min = -(slice_size * 10)
+  grid_slider.max = slice_size * 10
 
   // display the loader
   loader.classList.add('visible')
@@ -420,11 +469,11 @@ scanimate_button.addEventListener('click', async () => {
     animation_direction === 'Up' || animation_direction === 'Down'
 
   // set slice variables according to animation direction
-  const slice_height = is_horizontal_animation ? slice_size : 1000
-  const slice_width = is_horizontal_animation ? 1000 : slice_size
+  const slice_height = is_horizontal_animation ? slice_size : render_export_size
+  const slice_width = is_horizontal_animation ? render_export_size : slice_size
 
   // slice the image in equal sections according to the settings
-  const slices_amount = 1000 / slice_size
+  const slices_amount = render_export_size / slice_size
 
   // create a canvas for each frame to slice the image
   for (let frame = 0; frame < frames_amount; frame++) {
@@ -448,17 +497,20 @@ scanimate_button.addEventListener('click', async () => {
     }
 
     // clear the frame canvas to draw next frame
-    frame_context.clearRect(0, 0, 1000, 1000)
+    frame_context.clearRect(0, 0, render_export_size, render_export_size)
   }
 
+  // hide the slices in equal sections according to the settings
+  const hiders_amount = grid_export_size / slice_size
+
   // create the grid
-  for (let hider = 0; hider < slices_amount; hider += frames_amount) {
+  for (let hider = 0; hider < hiders_amount; hider += frames_amount) {
     const start_x = is_horizontal_animation ? 0 : hider * slice_size
     const start_y = is_horizontal_animation ? hider * slice_size : 0
 
     const hider_size = slice_size * (frames_amount - 1)
-    const hider_height = is_horizontal_animation ? hider_size : 1000
-    const hider_width = is_horizontal_animation ? 1000 : hider_size
+    const hider_height = is_horizontal_animation ? hider_size : grid_export_size
+    const hider_width = is_horizontal_animation ? grid_export_size : hider_size
 
     const coords = [start_x, start_y, hider_width, hider_height]
 
@@ -474,6 +526,7 @@ scanimate_button.addEventListener('click', async () => {
   buttons.style.display = 'none'
   shape_selectors.style.display = 'none'
 
+  grid_slider.style.display = 'block'
   back_button.style.display = 'block'
 })
 
@@ -488,6 +541,7 @@ back_button.addEventListener('click', () => {
   render_canvas.style.display = 'none'
   grid_canvas.style.display = 'none'
   back_button.style.display = 'none'
+  grid_slider.style.display = 'none'
 
   // show the animation playground
   shape.style.display = 'flex'
