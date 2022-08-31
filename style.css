@@ -186,6 +186,10 @@ label {
   font-size: 5vw;
 }
 
+#grid-svg {
+  position: absolute;
+}
+
 #grid-slider {
   position: fixed;
   bottom: 80px;

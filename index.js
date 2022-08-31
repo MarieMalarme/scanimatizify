@@ -81,8 +81,9 @@ shape.id = 'shape'
 
 // create the svg shape
 const svg = document.createElementNS(w3_url, 'svg')
+const shape_viewbox_size = 1000
 svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-svg.setAttribute('viewBox', '0 0 1000 1000')
+svg.setAttribute('viewBox', `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`)
 
 // create the path
 const morph_path = document.createElementNS(w3_url, 'path')
@@ -195,7 +196,7 @@ shapes_paths.forEach((shape_path, index) => {
   shape_selector.style.width = `calc(${100 / shapes_paths.length}%)`
 
   const svg = document.createElementNS(w3_url, 'svg')
-  svg.setAttribute('viewBox', '0 0 1000 1000')
+  svg.setAttribute('viewBox', `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`)
 
   const path = document.createElementNS(w3_url, 'path')
   const id = `path-${index + 1}`
@@ -384,13 +385,9 @@ loader.textContent = 'Scanimating...'
 body.append(loader)
 
 // size of the render canvas
-const render_export_size = 1000 // in px to be exported
-const render_display_size = 65 // in vh to be displayed on the page
-
-// make the grid 15% bigger than the canvas to move it around
-const grid_inc = 0.15
-const grid_export_size = render_export_size + render_export_size * grid_inc
-const grid_display_size = render_display_size + render_display_size * grid_inc
+const render_inc = 0.15 // make the render 15% bigger to have white space around
+const render_export_size = shape_viewbox_size + shape_viewbox_size * render_inc // in px to be exported
+const render_display_size = '70vh' // in vh to be displayed on the page
 
 // set render canvas to draw the scanimation image result
 const render_canvas = document.createElement('canvas')
@@ -399,17 +396,18 @@ render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas hidden'
 render_canvas.width = render_export_size // width fitting the svg viewBox width
 render_canvas.height = render_export_size // height fitting the svg viewBox height
-render_canvas.style.width = `${render_display_size}vh` // to do: add as customisable setting in the panel
-render_canvas.style.height = `${render_display_size}vh` // to do: add as customisable setting in the panel
+render_canvas.style.width = render_display_size // to do: add as customisable setting in the panel
+render_canvas.style.height = render_display_size // to do: add as customisable setting in the panel
 body.append(render_canvas)
 
 // set svg to draw the grid to animate the image result
 const grid_svg = document.createElementNS(w3_url, 'svg')
+const grid_svg_viewbox = `0 0 ${render_export_size} ${render_export_size}`
 grid_svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-grid_svg.setAttribute('viewBox', `0 0 ${grid_export_size} ${grid_export_size}`)
-grid_svg.setAttribute('width', `${grid_display_size}vh`)
-grid_svg.setAttribute('height', `${grid_display_size}vh`)
-grid_svg.style.position = 'absolute'
+grid_svg.setAttribute('viewBox', grid_svg_viewbox)
+grid_svg.setAttribute('width', render_display_size)
+grid_svg.setAttribute('height', render_display_size)
+grid_svg.id = 'grid-svg'
 body.append(grid_svg)
 
 // create a grid slider to move the grid on top of the scanimation image
@@ -522,14 +520,16 @@ scanimate_button.addEventListener('click', async () => {
     // then jump to next slice that has to be drawn:
     // ignore slices in between that will be the other frames' slices
     for (let slice = frame; slice < slices_amount; slice += frames_amount) {
-      const x = is_horizontal_animation ? slice * slice_size : 0
-      const y = is_horizontal_animation ? 0 : slice * slice_size
-      const coords = [x, y, slice_width, slice_height]
+      // get coords to copy the slice from the frame canvas
+      const copy_x = is_horizontal_animation ? slice * slice_size : 0
+      const copy_y = is_horizontal_animation ? 0 : slice * slice_size
+      const copy_coords = [copy_x, copy_y, slice_width, slice_height]
+      const copied_pixels = frame_context.getImageData(...copy_coords)
 
-      // copy the selected slice from the current frame canvas
-      const pixels = frame_context.getImageData(...coords)
-      // paste the selected slice to the final canvas
-      render_context.putImageData(pixels, x, y)
+      // set coords to paste the slice to the render canvas
+      const paste_padding = (render_export_size - shape_viewbox_size) / 2
+      const paste_coords = [copy_x + paste_padding, copy_y + paste_padding]
+      render_context.putImageData(copied_pixels, ...paste_coords)
     }
 
     // clear the frame canvas to draw next frame
@@ -537,23 +537,23 @@ scanimate_button.addEventListener('click', async () => {
   }
 
   // hide the slices in equal sections according to the settings
-  const hiders_amount = grid_export_size / slice_size
+  const hiders_amount = render_export_size / slice_size
 
   // create the grid
   for (let hider = 0; hider < hiders_amount; hider += frames_amount) {
     const x = is_horizontal_animation ? hider * slice_size : 0
     const y = is_horizontal_animation ? 0 : hider * slice_size
 
-    const hider_size = slice_size * (frames_amount - 1)
-    const hider_width = is_horizontal_animation ? hider_size : grid_export_size
-    const hider_height = is_horizontal_animation ? grid_export_size : hider_size
+    const size = slice_size * (frames_amount - 1)
+    const width = is_horizontal_animation ? size : render_export_size
+    const height = is_horizontal_animation ? render_export_size : size
 
     // add the hider to the svg grid
     const rect = document.createElementNS(w3_url, 'rect')
     rect.setAttribute('x', x)
     rect.setAttribute('y', y)
-    rect.setAttribute('width', hider_width)
-    rect.setAttribute('height', hider_height)
+    rect.setAttribute('width', width)
+    rect.setAttribute('height', height)
     grid_svg.append(rect)
   }
 
@@ -618,10 +618,10 @@ const download_grid = (format = 'png') => {
     const image = new Image()
     image.onload = () => {
       const canvas = document.createElement('canvas')
-      canvas.width = grid_export_size
-      canvas.height = grid_export_size
+      canvas.width = render_export_size
+      canvas.height = render_export_size
       const context = canvas.getContext('2d')
-      context.drawImage(image, 0, 0, grid_export_size, grid_export_size)
+      context.drawImage(image, 0, 0, render_export_size, render_export_size)
 
       const png = canvas.toDataURL('image/png')
       link.href = png
