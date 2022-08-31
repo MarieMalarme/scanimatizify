@@ -403,6 +403,11 @@ grid_slider.max = slice_size * 10
 grid_slider.value = 0
 grid_slider.step = slice_size / 10
 
+const grid_label = document.createElement('label')
+grid_label.id = 'grid-label'
+grid_label.textContent = 'Slide here or scroll to move the grid & animate!'
+body.append(grid_label)
+
 let translate_grid = 0
 
 // move the grid with the slider
@@ -527,6 +532,7 @@ scanimate_button.addEventListener('click', async () => {
   shape_selectors.style.display = 'none'
 
   grid_slider.style.display = 'block'
+  grid_label.style.display = 'block'
   back_button.style.display = 'block'
 })
 
@@ -542,6 +548,7 @@ back_button.addEventListener('click', () => {
   grid_canvas.style.display = 'none'
   back_button.style.display = 'none'
   grid_slider.style.display = 'none'
+  grid_label.style.display = 'none'
 
   // show the animation playground
   shape.style.display = 'flex'

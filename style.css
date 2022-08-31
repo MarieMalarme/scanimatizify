@@ -199,3 +199,9 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: 30px;
   outline: none;
 }
+
+#grid-label {
+  position: absolute;
+  bottom: 25px;
+  display: none;
+}
