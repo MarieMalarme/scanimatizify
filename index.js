@@ -482,7 +482,8 @@ scanimate_button.addEventListener('click', async () => {
 
   // disable download buttons
   download_render_button.disabled = true
-  download_grid_button.disabled = true
+  download_grid_png_button.disabled = true
+  download_grid_svg_button.disabled = true
 
   // hide scanimation render
   grid_slider.classList.add('hidden')
@@ -574,22 +575,84 @@ scanimate_button.addEventListener('click', async () => {
 
   // enable download buttons
   download_render_button.disabled = false
-  download_grid_button.disabled = false
+  download_grid_png_button.disabled = false
+  download_grid_svg_button.disabled = false
 })
 
 scanimation_settings.append(scanimate_button)
+
+// export render in png
+const download_render = () => {
+  const link = document.createElement('a')
+  const image = render_canvas
+    .toDataURL('image/png')
+    .replace('image/png', 'image/octet-stream')
+  link.href = image
+  link.download = 'scanimation-render.png'
+  link.click()
+  link.remove()
+}
 
 const download_render_button = document.createElement('button')
 download_render_button.className = 'download'
 download_render_button.disabled = true
 download_render_button.textContent = 'Download render'
+download_render_button.addEventListener('click', download_render)
 controls_panel.append(download_render_button)
 
-const download_grid_button = document.createElement('button')
-download_grid_button.className = 'download'
-download_grid_button.disabled = true
-download_grid_button.textContent = 'Download grid'
-controls_panel.append(download_grid_button)
+// export grid in svg or png
+const download_grid = (format = 'png') => {
+  const cloned_svg = grid_svg.cloneNode(true)
+  cloned_svg.removeAttribute('style')
+  cloned_svg.removeAttribute('width')
+  cloned_svg.removeAttribute('height')
+
+  const { outerHTML: svg_html } = cloned_svg
+  const blob = new Blob([svg_html], { type: 'image/svg+xml;charset=utf-8' })
+  const URL = window.URL || window.webkitURL || window
+  const blobURL = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+
+  if (format === 'png') {
+    const image = new Image()
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = grid_export_size
+      canvas.height = grid_export_size
+      const context = canvas.getContext('2d')
+      context.drawImage(image, 0, 0, grid_export_size, grid_export_size)
+
+      const png = canvas.toDataURL('image/png')
+      link.href = png
+      link.download = 'scanimation-grid.png'
+      link.click()
+      link.remove()
+    }
+    image.src = blobURL
+  }
+
+  if (format === 'svg') {
+    link.href = blobURL
+    link.download = 'scanimation-grid.svg'
+    link.click()
+    link.remove()
+  }
+}
+
+const download_grid_png_button = document.createElement('button')
+download_grid_png_button.className = 'download'
+download_grid_png_button.disabled = true
+download_grid_png_button.textContent = 'Download grid in PNG'
+download_grid_png_button.addEventListener('click', () => download_grid('png'))
+controls_panel.append(download_grid_png_button)
+
+const download_grid_svg_button = document.createElement('button')
+download_grid_svg_button.className = 'download'
+download_grid_svg_button.disabled = true
+download_grid_svg_button.textContent = 'Download grid in SVG'
+download_grid_svg_button.addEventListener('click', () => download_grid('svg'))
+controls_panel.append(download_grid_svg_button)
 
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
