@@ -122,6 +122,8 @@ button.selected {
   border: solid 1px black;
   border-radius: 15px;
   padding: 25px;
+  display: flex;
+  flex-direction: column;
 }
 
 #scanimation-settings div {
@@ -133,7 +135,7 @@ select {
   margin-right: 10px;
   outline: none;
   padding: 5px 10px;
-  width: 75px;
+  width: 100px;
   border: solid 1px black;
   border-radius: 20px;
   height: 28px;
@@ -148,7 +150,6 @@ label {
 }
 
 #scanimate-button {
-  width: 210px;
   margin-top: 5px;
   padding: 5px 10px;
   background: black;
@@ -172,7 +173,7 @@ label {
 
 #grid-slider {
   position: fixed;
-  bottom: 50px;
+  bottom: 80px;
   display: none;
   width: 1000px;
 }
@@ -202,6 +203,6 @@ input[type='range']::-webkit-slider-thumb {
 
 #grid-label {
   position: absolute;
-  bottom: 25px;
+  bottom: 55px;
   display: none;
 }

@@ -285,7 +285,7 @@ body.append(shape_selectors)
 let frames_amount = 4
 let slice_size = 2
 let curves_smoothness = 5
-const animation_directions = ['Left', 'Right', 'Up', 'Down']
+const animation_directions = ['Horizontal', 'Vertical']
 let animation_direction = animation_directions[0]
 
 const scanimation_settings = document.createElement('div')
@@ -364,7 +364,7 @@ body.append(loader)
 
 // size of the render canvas
 const render_export_size = 1000 // in px to be exported
-const render_display_size = 70 // in vh to be displayed on the page
+const render_display_size = 65 // in vh to be displayed on the page
 
 // make the grid 15% bigger than the canvas to move it around
 const grid_inc = 0.15
@@ -413,8 +413,7 @@ let translate_grid = 0
 // move the grid with the slider
 grid_slider.addEventListener('input', (event) => {
   translate_grid = Number(event.target.value)
-  const axis =
-    animation_direction === 'Up' || animation_direction === 'Down' ? 'Y' : 'X'
+  const axis = animation_direction === 'Horizontal' ? 'X' : 'Y'
   grid_canvas.style.transform = `translate${axis}(${translate_grid}px)`
 })
 
@@ -423,8 +422,7 @@ grid_canvas.addEventListener('mousewheel', (event) => {
   const step = Number(grid_slider.step)
   const inc = event.deltaY < 0 ? -step : step
   translate_grid += inc
-  const axis =
-    animation_direction === 'Up' || animation_direction === 'Down' ? 'Y' : 'X'
+  const axis = animation_direction === 'Horizontal' ? 'X' : 'Y'
   grid_canvas.style.transform = `translate${axis}(${translate_grid}px)`
   grid_slider.value = translate_grid
 })
@@ -470,12 +468,11 @@ scanimate_button.addEventListener('click', async () => {
   const smoothness = { maxSegmentLength: curves_smoothness }
   const interpolator = flubber.interpolate(start, end, smoothness)
 
-  const is_horizontal_animation =
-    animation_direction === 'Up' || animation_direction === 'Down'
+  const is_horizontal_animation = animation_direction === 'Horizontal'
 
   // set slice variables according to animation direction
-  const slice_height = is_horizontal_animation ? slice_size : render_export_size
-  const slice_width = is_horizontal_animation ? render_export_size : slice_size
+  const slice_height = is_horizontal_animation ? render_export_size : slice_size
+  const slice_width = is_horizontal_animation ? slice_size : render_export_size
 
   // slice the image in equal sections according to the settings
   const slices_amount = render_export_size / slice_size
@@ -491,8 +488,8 @@ scanimate_button.addEventListener('click', async () => {
     // then jump to next slice that has to be drawn:
     // ignore slices in between that will be the other frames' slices
     for (let slice = frame; slice < slices_amount; slice += frames_amount) {
-      const start_x = is_horizontal_animation ? 0 : slice * slice_size
-      const start_y = is_horizontal_animation ? slice * slice_size : 0
+      const start_x = is_horizontal_animation ? slice * slice_size : 0
+      const start_y = is_horizontal_animation ? 0 : slice * slice_size
       const coords = [start_x, start_y, slice_width, slice_height]
 
       // copy the selected slice from the current frame canvas
@@ -510,12 +507,12 @@ scanimate_button.addEventListener('click', async () => {
 
   // create the grid
   for (let hider = 0; hider < hiders_amount; hider += frames_amount) {
-    const start_x = is_horizontal_animation ? 0 : hider * slice_size
-    const start_y = is_horizontal_animation ? hider * slice_size : 0
+    const start_x = is_horizontal_animation ? hider * slice_size : 0
+    const start_y = is_horizontal_animation ? 0 : hider * slice_size
 
     const hider_size = slice_size * (frames_amount - 1)
-    const hider_height = is_horizontal_animation ? hider_size : grid_export_size
-    const hider_width = is_horizontal_animation ? grid_export_size : hider_size
+    const hider_width = is_horizontal_animation ? hider_size : grid_export_size
+    const hider_height = is_horizontal_animation ? grid_export_size : hider_size
 
     const coords = [start_x, start_y, hider_width, hider_height]
 
