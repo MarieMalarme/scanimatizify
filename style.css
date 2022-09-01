@@ -153,7 +153,8 @@ button.download:disabled {
 }
 
 input,
-select {
+select,
+.switch {
   margin-right: 10px;
   outline: none;
   padding: 5px 10px;
@@ -169,6 +170,36 @@ select {
 
 label {
   font-size: 14px;
+}
+
+#loop-control {
+  display: flex;
+  align-items: center;
+}
+
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.switch-dot {
+  left: 5px;
+  width: 18px;
+  height: 18px;
+  background: rgb(170, 170, 170);
+  position: absolute;
+  border-radius: 50%;
+}
+
+.switch.active .switch-dot {
+  background: black;
+  left: 75px;
+}
+
+#scanimation-settings div.switch {
+  margin-bottom: 0;
 }
 
 #scanimate-button {

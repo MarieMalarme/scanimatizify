@@ -311,6 +311,7 @@ body.append(shape_selectors)
 
 // scanimation settings
 let frames_amount = 4
+let loop_on = true
 let slice_size = 2
 let curves_smoothness = 5
 const animation_axes = ['Horizontal', 'Vertical']
@@ -339,6 +340,24 @@ frames_input.addEventListener('click', (event) => {
 frames.append(frames_input)
 frames.append(frames_label)
 scanimation_settings.append(frames)
+
+// input to set loop mode
+const loop = document.createElement('div')
+loop.id = 'loop-control'
+const loop_label = document.createElement('label')
+loop_label.textContent = 'Loop animation'
+const loop_switch = document.createElement('div')
+loop_switch.classList.add('switch', 'active')
+loop_switch.addEventListener('click', () => {
+  loop_on = !loop_on
+  loop_switch.classList.toggle('active')
+})
+const loop_switch_dot = document.createElement('span')
+loop_switch_dot.classList.add('switch-dot')
+loop_switch.append(loop_switch_dot)
+loop.append(loop_switch)
+loop.append(loop_label)
+scanimation_settings.append(loop)
 
 // input to set size of one slice to cut the images
 const slice = document.createElement('div')
@@ -537,17 +556,25 @@ scanimate_button.addEventListener('click', async () => {
   // slice the image in equal sections according to the settings
   const slices_amount = render_export_size / slice_size
 
+  // get the total frames amount; in case the loop is on, the amount is increased
+  const loop_frames_amount = frames_amount + (frames_amount - 2)
+  const frames_amount_sum = loop_on ? loop_frames_amount : frames_amount
+
   // create a canvas for each frame to slice the image
-  for (let frame = 0; frame < frames_amount; frame++) {
+  for (let frame = 0; frame < frames_amount_sum; frame++) {
     // draw the corresponding morph steph path
-    const frame_step = frame / (frames_amount - 1)
-    const frame_path = new Path2D(interpolator(frame_step))
+    // if the loop is on, past the last animation frame, the frames go reverse
+    const has_reached_animation_end = frame > frames_amount - 1
+    const reversed_frame = frame - (frame - (frames_amount - 1)) * 2
+    const frame_step = has_reached_animation_end ? reversed_frame : frame
+    const morph_step = frame_step / (frames_amount - 1)
+    const frame_path = new Path2D(interpolator(morph_step))
     frame_context.fill(frame_path)
 
-    // first slice to display starts from the current frame
-    // then jump to next slice that has to be drawn:
-    // ignore slices in between that will be the other frames' slices
-    for (let slice = frame; slice < slices_amount; slice += frames_amount) {
+    // slice the frame and draw the visible slices to the render:
+    // first slice to display starts from the current frame, then jump to next slice that
+    // has to be drawn; ignore slices in between that will be the other frames' slices
+    for (let slice = frame; slice < slices_amount; slice += frames_amount_sum) {
       // get coords to copy the slice from the frame canvas
       const copy_x = is_horizontal_axis ? slice * slice_size : 0
       const copy_y = is_horizontal_axis ? 0 : slice * slice_size
@@ -565,10 +592,10 @@ scanimate_button.addEventListener('click', async () => {
   }
 
   // create the grid by hiding the slices in equal sections according to the settings
-  for (let slice = 0; slice < slices_amount; slice += frames_amount) {
+  for (let slice = 0; slice < slices_amount; slice += frames_amount_sum) {
     const hider_x = is_horizontal_axis ? slice * slice_size : 0
     const hider_y = is_horizontal_axis ? 0 : slice * slice_size
-    const hider_size = slice_size * (frames_amount - 1)
+    const hider_size = slice_size * (frames_amount_sum - 1)
     const hider_width = is_horizontal_axis ? hider_size : render_export_size
     const hider_height = is_horizontal_axis ? render_export_size : hider_size
 
