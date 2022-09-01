@@ -36,6 +36,7 @@ button {
 #buttons button {
   width: 130px;
   padding: 7px;
+  margin: 0 10px;
 }
 
 .hidden,
@@ -186,7 +187,7 @@ label {
   font-size: 5vw;
 }
 
-.grid {
+#grids {
   position: absolute;
 }
 

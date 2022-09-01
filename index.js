@@ -140,19 +140,31 @@ video_button.addEventListener('click', () => {
   video_button.textContent = paused ? 'Play animation' : 'Pause animation'
 })
 
+// button to hide the grids
 const hide_grid_button = document.createElement('button')
 hide_grid_button.id = 'hide-grid-button'
 hide_grid_button.classList.add('hidden')
 hide_grid_button.textContent = 'Hide grid'
-
 buttons.append(hide_grid_button)
-body.append(buttons)
 
 hide_grid_button.addEventListener('click', () => {
-  const is_grid_hidden = grid_hiders.classList.toggle('hidden')
-  hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
+  const is_grid_hidden = grids.classList.toggle('hidden')
   grid_slider.classList.toggle('hidden')
   grid_label.classList.toggle('hidden')
+  hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
+})
+
+// button to switch the grid mode (hiders or cutouts)
+const set_grid_mode_button = document.createElement('button')
+set_grid_mode_button.id = 'set-grid-mode-button'
+set_grid_mode_button.classList.add('hidden')
+set_grid_mode_button.textContent = 'See cutouts'
+buttons.append(set_grid_mode_button)
+
+set_grid_mode_button.addEventListener('click', () => {
+  const is_cutouts = grid_hiders.classList.toggle('hidden')
+  grid_cutouts.classList.toggle('hidden')
+  set_grid_mode_button.textContent = is_cutouts ? 'See hiders' : 'See cutouts'
 })
 
 // shapes select buttons
@@ -401,6 +413,9 @@ render_canvas.style.height = render_display_size // to do: add as customisable s
 body.append(render_canvas)
 
 // set svg to draw the grid to animate the image result
+const grids = document.createElement('div')
+grids.id = 'grids'
+grids.classList.add('hidden')
 const grid_viewbox = `0 0 ${render_export_size} ${render_export_size}`
 
 const grid_cutouts = document.createElementNS(w3_url, 'svg')
@@ -410,16 +425,18 @@ grid_cutouts.setAttribute('width', render_display_size)
 grid_cutouts.setAttribute('height', render_display_size)
 grid_cutouts.classList.add('grid', 'hidden')
 grid_cutouts.id = 'grid-cutouts'
-body.append(grid_cutouts)
+grids.append(grid_cutouts)
 
 const grid_hiders = document.createElementNS(w3_url, 'svg')
 grid_hiders.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 grid_hiders.setAttribute('viewBox', grid_viewbox)
 grid_hiders.setAttribute('width', render_display_size)
 grid_hiders.setAttribute('height', render_display_size)
-grid_hiders.classList.add('grid', 'hidden')
+grid_hiders.classList.add('grid')
 grid_hiders.id = 'grid-hiders'
-body.append(grid_hiders)
+grids.append(grid_hiders)
+
+body.append(grids)
 
 // create a grid slider to move the grid on top of the scanimation image
 // and have an overview of the animation
@@ -435,7 +452,7 @@ grid_slider.step = slice_size / 10
 const grid_label = document.createElement('label')
 grid_label.id = 'grid-label'
 grid_label.classList.add('hidden')
-grid_label.textContent = 'Slide here or scroll to move the grid & animate!'
+grid_label.textContent = `Slide here or scroll on the grid to move it & see the animation!`
 body.append(grid_label)
 
 let translate_grid = 0
@@ -444,18 +461,16 @@ let translate_grid = 0
 grid_slider.addEventListener('input', (event) => {
   translate_grid = Number(event.target.value)
   const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
-  grid_hiders.style.transform = `translate${axis}(${translate_grid}px)`
-  grid_cutouts.style.transform = `translate${axis}(${translate_grid}px)`
+  grids.style.transform = `translate${axis}(${translate_grid}px)`
 })
 
 // move the grid on scroll
-grid_hiders.addEventListener('mousewheel', (event) => {
+grids.addEventListener('mousewheel', (event) => {
   const step = Number(grid_slider.step)
   const inc = event.deltaY < 0 ? -step : step
   translate_grid += inc
   const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
-  grid_hiders.style.transform = `translate${axis}(${translate_grid}px)`
-  grid_cutouts.style.transform = `translate${axis}(${translate_grid}px)`
+  grids.style.transform = `translate${axis}(${translate_grid}px)`
   grid_slider.value = translate_grid
 })
 body.append(grid_slider)
@@ -476,12 +491,11 @@ scanimate_button.addEventListener('click', async () => {
   paused = true
   video_button.textContent = 'Play animation'
 
-  // clear render canvas & grid svg to redraw if already drawn on
+  // clear render canvas & grids to redraw if already drawn on
   render_context.clearRect(0, 0, render_export_size, render_export_size)
   render_canvas.classList.remove('hidden')
   const grid_slices = [...grid_hiders.children, ...grid_cutouts.children]
   grid_slices.forEach((slice) => slice.remove())
-  grid_hiders.classList.remove('hidden')
 
   // reset grid slider & position on new scanimation
   translate_grid = 0
@@ -489,8 +503,7 @@ scanimate_button.addEventListener('click', async () => {
   grid_slider.step = slice_size / 10
   grid_slider.min = -(slice_size * 10)
   grid_slider.max = slice_size * 10
-  grid_hiders.style.transform = `translate(0px)`
-  grid_cutouts.style.transform = `translate(0px)`
+  grids.style.transform = `translate(0px)`
 
   // disable download buttons
   download_render_button.disabled = true
@@ -501,6 +514,7 @@ scanimate_button.addEventListener('click', async () => {
   grid_slider.classList.add('hidden')
   grid_label.classList.add('hidden')
   hide_grid_button.classList.add('hidden')
+  set_grid_mode_button.classList.add('hidden')
 
   // display the loader & disable pointer events
   loader.classList.remove('hidden')
@@ -592,10 +606,15 @@ scanimate_button.addEventListener('click', async () => {
 
   // show the scanimation render
   back_button.classList.remove('hidden')
+  grids.classList.remove('hidden')
+  grid_hiders.classList.remove('hidden')
+  grid_cutouts.classList.add('hidden')
   grid_slider.classList.remove('hidden')
   grid_label.classList.remove('hidden')
   hide_grid_button.classList.remove('hidden')
   hide_grid_button.textContent = 'Hide grid'
+  set_grid_mode_button.classList.remove('hidden')
+  set_grid_mode_button.textContent = 'See cutouts'
 
   // enable download buttons
   download_render_button.disabled = false
@@ -693,8 +712,9 @@ back_button.addEventListener('click', () => {
   // hide scanimation render
   back_button.classList.add('hidden')
   render_canvas.classList.add('hidden')
-  grid_hiders.classList.add('hidden')
+  grids.classList.add('hidden')
   hide_grid_button.classList.add('hidden')
+  set_grid_mode_button.classList.add('hidden')
   grid_slider.classList.add('hidden')
   grid_label.classList.add('hidden')
 
