@@ -186,7 +186,7 @@ label {
   font-size: 5vw;
 }
 
-#grid-svg {
+.grid {
   position: absolute;
 }
 

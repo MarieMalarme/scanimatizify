@@ -149,7 +149,7 @@ buttons.append(hide_grid_button)
 body.append(buttons)
 
 hide_grid_button.addEventListener('click', () => {
-  const is_grid_hidden = grid_svg.classList.toggle('hidden')
+  const is_grid_hidden = grid_hiders.classList.toggle('hidden')
   hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
   grid_slider.classList.toggle('hidden')
   grid_label.classList.toggle('hidden')
@@ -301,8 +301,8 @@ body.append(shape_selectors)
 let frames_amount = 4
 let slice_size = 2
 let curves_smoothness = 5
-const animation_directions = ['Horizontal', 'Vertical']
-let animation_direction = animation_directions[0]
+const animation_axes = ['Horizontal', 'Vertical']
+let animation_axis = animation_axes[0]
 
 const controls_panel = document.createElement('div')
 controls_panel.id = 'controls-panel'
@@ -365,14 +365,14 @@ const direction = document.createElement('div')
 const direction_label = document.createElement('label')
 direction_label.textContent = 'Animation direction'
 const direction_input = document.createElement('select')
-animation_directions.map((direction) => {
+animation_axes.map((direction) => {
   const option = document.createElement('option')
   option.text = direction
   direction_input.append(option)
 })
-direction_input.value = animation_direction
+direction_input.value = animation_axis
 direction_input.addEventListener('change', (event) => {
-  animation_direction = event.target.value
+  animation_axis = event.target.value
 })
 direction.append(direction_input)
 direction.append(direction_label)
@@ -401,14 +401,25 @@ render_canvas.style.height = render_display_size // to do: add as customisable s
 body.append(render_canvas)
 
 // set svg to draw the grid to animate the image result
-const grid_svg = document.createElementNS(w3_url, 'svg')
-const grid_svg_viewbox = `0 0 ${render_export_size} ${render_export_size}`
-grid_svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-grid_svg.setAttribute('viewBox', grid_svg_viewbox)
-grid_svg.setAttribute('width', render_display_size)
-grid_svg.setAttribute('height', render_display_size)
-grid_svg.id = 'grid-svg'
-body.append(grid_svg)
+const grid_viewbox = `0 0 ${render_export_size} ${render_export_size}`
+
+const grid_cutouts = document.createElementNS(w3_url, 'svg')
+grid_cutouts.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+grid_cutouts.setAttribute('viewBox', grid_viewbox)
+grid_cutouts.setAttribute('width', render_display_size)
+grid_cutouts.setAttribute('height', render_display_size)
+grid_cutouts.classList.add('grid', 'hidden')
+grid_cutouts.id = 'grid-cutouts'
+body.append(grid_cutouts)
+
+const grid_hiders = document.createElementNS(w3_url, 'svg')
+grid_hiders.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+grid_hiders.setAttribute('viewBox', grid_viewbox)
+grid_hiders.setAttribute('width', render_display_size)
+grid_hiders.setAttribute('height', render_display_size)
+grid_hiders.classList.add('grid', 'hidden')
+grid_hiders.id = 'grid-hiders'
+body.append(grid_hiders)
 
 // create a grid slider to move the grid on top of the scanimation image
 // and have an overview of the animation
@@ -432,17 +443,19 @@ let translate_grid = 0
 // move the grid with the slider
 grid_slider.addEventListener('input', (event) => {
   translate_grid = Number(event.target.value)
-  const axis = animation_direction === 'Horizontal' ? 'X' : 'Y'
-  grid_svg.style.transform = `translate${axis}(${translate_grid}px)`
+  const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
+  grid_hiders.style.transform = `translate${axis}(${translate_grid}px)`
+  grid_cutouts.style.transform = `translate${axis}(${translate_grid}px)`
 })
 
 // move the grid on scroll
-grid_svg.addEventListener('mousewheel', (event) => {
+grid_hiders.addEventListener('mousewheel', (event) => {
   const step = Number(grid_slider.step)
   const inc = event.deltaY < 0 ? -step : step
   translate_grid += inc
-  const axis = animation_direction === 'Horizontal' ? 'X' : 'Y'
-  grid_svg.style.transform = `translate${axis}(${translate_grid}px)`
+  const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
+  grid_hiders.style.transform = `translate${axis}(${translate_grid}px)`
+  grid_cutouts.style.transform = `translate${axis}(${translate_grid}px)`
   grid_slider.value = translate_grid
 })
 body.append(grid_slider)
@@ -466,9 +479,9 @@ scanimate_button.addEventListener('click', async () => {
   // clear render canvas & grid svg to redraw if already drawn on
   render_context.clearRect(0, 0, render_export_size, render_export_size)
   render_canvas.classList.remove('hidden')
-  const grid_hiders = [...grid_svg.children]
-  grid_hiders.forEach((hider) => hider.remove())
-  grid_svg.classList.remove('hidden')
+  const grid_slices = [...grid_hiders.children, ...grid_cutouts.children]
+  grid_slices.forEach((slice) => slice.remove())
+  grid_hiders.classList.remove('hidden')
 
   // reset grid slider & position on new scanimation
   translate_grid = 0
@@ -476,12 +489,13 @@ scanimate_button.addEventListener('click', async () => {
   grid_slider.step = slice_size / 10
   grid_slider.min = -(slice_size * 10)
   grid_slider.max = slice_size * 10
-  grid_svg.style.transform = `translate(0px)`
+  grid_hiders.style.transform = `translate(0px)`
+  grid_cutouts.style.transform = `translate(0px)`
 
   // disable download buttons
   download_render_button.disabled = true
-  download_grid_png_button.disabled = true
-  download_grid_svg_button.disabled = true
+  download_grid_hiders_button.disabled = true
+  download_grid_cutouts_button.disabled = true
 
   // hide scanimation render
   grid_slider.classList.add('hidden')
@@ -500,11 +514,11 @@ scanimate_button.addEventListener('click', async () => {
   const smoothness = { maxSegmentLength: curves_smoothness }
   const interpolator = flubber.interpolate(start, end, smoothness)
 
-  const is_horizontal_animation = animation_direction === 'Horizontal'
+  const is_horizontal_axis = animation_axis === 'Horizontal'
 
   // set slice variables according to animation direction
-  const slice_height = is_horizontal_animation ? render_export_size : slice_size
-  const slice_width = is_horizontal_animation ? slice_size : render_export_size
+  const slice_height = is_horizontal_axis ? render_export_size : slice_size
+  const slice_width = is_horizontal_axis ? slice_size : render_export_size
 
   // slice the image in equal sections according to the settings
   const slices_amount = render_export_size / slice_size
@@ -521,8 +535,8 @@ scanimate_button.addEventListener('click', async () => {
     // ignore slices in between that will be the other frames' slices
     for (let slice = frame; slice < slices_amount; slice += frames_amount) {
       // get coords to copy the slice from the frame canvas
-      const copy_x = is_horizontal_animation ? slice * slice_size : 0
-      const copy_y = is_horizontal_animation ? 0 : slice * slice_size
+      const copy_x = is_horizontal_axis ? slice * slice_size : 0
+      const copy_y = is_horizontal_axis ? 0 : slice * slice_size
       const copy_coords = [copy_x, copy_y, slice_width, slice_height]
       const copied_pixels = frame_context.getImageData(...copy_coords)
 
@@ -536,25 +550,35 @@ scanimate_button.addEventListener('click', async () => {
     frame_context.clearRect(0, 0, render_export_size, render_export_size)
   }
 
-  // hide the slices in equal sections according to the settings
-  const hiders_amount = render_export_size / slice_size
+  // create the grid by hiding the slices in equal sections according to the settings
+  for (let slice = 0; slice < slices_amount; slice += frames_amount) {
+    const hider_x = is_horizontal_axis ? slice * slice_size : 0
+    const hider_y = is_horizontal_axis ? 0 : slice * slice_size
+    const hider_size = slice_size * (frames_amount - 1)
+    const hider_width = is_horizontal_axis ? hider_size : render_export_size
+    const hider_height = is_horizontal_axis ? render_export_size : hider_size
 
-  // create the grid
-  for (let hider = 0; hider < hiders_amount; hider += frames_amount) {
-    const x = is_horizontal_animation ? hider * slice_size : 0
-    const y = is_horizontal_animation ? 0 : hider * slice_size
+    // add the hider to the hiders svg grid
+    const hider = document.createElementNS(w3_url, 'rect')
+    hider.setAttribute('x', hider_x)
+    hider.setAttribute('y', hider_y)
+    hider.setAttribute('width', hider_width)
+    hider.setAttribute('height', hider_height)
+    grid_hiders.append(hider)
 
-    const size = slice_size * (frames_amount - 1)
-    const width = is_horizontal_animation ? size : render_export_size
-    const height = is_horizontal_animation ? render_export_size : size
+    // add the cutout to the cutouts svg grid
+    const cutout_x = is_horizontal_axis ? hider_x + hider_width : 0
+    const cutout_y = is_horizontal_axis ? 0 : hider_y + hider_height
+    const cutout_width = is_horizontal_axis ? slice_size : render_export_size
+    const cutout_height = is_horizontal_axis ? render_export_size : slice_size
 
-    // add the hider to the svg grid
-    const rect = document.createElementNS(w3_url, 'rect')
-    rect.setAttribute('x', x)
-    rect.setAttribute('y', y)
-    rect.setAttribute('width', width)
-    rect.setAttribute('height', height)
-    grid_svg.append(rect)
+    const cutout = document.createElementNS(w3_url, 'rect')
+    cutout.setAttribute('x', cutout_x)
+    cutout.setAttribute('y', cutout_y)
+    cutout.setAttribute('width', cutout_width)
+    cutout.setAttribute('height', cutout_height)
+    cutout.setAttribute('class', 'cutout')
+    grid_cutouts.append(cutout)
   }
 
   // remove the loader & enable pointer events
@@ -575,8 +599,8 @@ scanimate_button.addEventListener('click', async () => {
 
   // enable download buttons
   download_render_button.disabled = false
-  download_grid_png_button.disabled = false
-  download_grid_svg_button.disabled = false
+  download_grid_hiders_button.disabled = false
+  download_grid_cutouts_button.disabled = false
 })
 
 scanimation_settings.append(scanimate_button)
@@ -602,7 +626,8 @@ controls_panel.append(download_render_button)
 
 // export grid in svg or png
 const download_grid = (format = 'png') => {
-  const cloned_svg = grid_svg.cloneNode(true)
+  const svg = format === 'png' ? grid_hiders : grid_cutouts
+  const cloned_svg = svg.cloneNode(true)
   cloned_svg.removeAttribute('style')
   cloned_svg.removeAttribute('width')
   cloned_svg.removeAttribute('height')
@@ -640,19 +665,23 @@ const download_grid = (format = 'png') => {
   }
 }
 
-const download_grid_png_button = document.createElement('button')
-download_grid_png_button.className = 'download'
-download_grid_png_button.disabled = true
-download_grid_png_button.textContent = 'Download grid in PNG'
-download_grid_png_button.addEventListener('click', () => download_grid('png'))
-controls_panel.append(download_grid_png_button)
+const download_grid_hiders_button = document.createElement('button')
+download_grid_hiders_button.className = 'download'
+download_grid_hiders_button.disabled = true
+download_grid_hiders_button.textContent = 'Download grid in PNG'
+download_grid_hiders_button.addEventListener('click', () =>
+  download_grid('png'),
+)
+controls_panel.append(download_grid_hiders_button)
 
-const download_grid_svg_button = document.createElement('button')
-download_grid_svg_button.className = 'download'
-download_grid_svg_button.disabled = true
-download_grid_svg_button.textContent = 'Download grid in SVG'
-download_grid_svg_button.addEventListener('click', () => download_grid('svg'))
-controls_panel.append(download_grid_svg_button)
+const download_grid_cutouts_button = document.createElement('button')
+download_grid_cutouts_button.className = 'download'
+download_grid_cutouts_button.disabled = true
+download_grid_cutouts_button.textContent = 'Download grid cutouts in SVG'
+download_grid_cutouts_button.addEventListener('click', () =>
+  download_grid('svg'),
+)
+controls_panel.append(download_grid_cutouts_button)
 
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
@@ -664,7 +693,7 @@ back_button.addEventListener('click', () => {
   // hide scanimation render
   back_button.classList.add('hidden')
   render_canvas.classList.add('hidden')
-  grid_svg.classList.add('hidden')
+  grid_hiders.classList.add('hidden')
   hide_grid_button.classList.add('hidden')
   grid_slider.classList.add('hidden')
   grid_label.classList.add('hidden')
