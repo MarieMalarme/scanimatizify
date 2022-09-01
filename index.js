@@ -626,12 +626,13 @@ scanimation_settings.append(scanimate_button)
 
 // export render in png
 const download_render = () => {
+  const file_name = `scanimation-render-${frames_amount}fr-${slice_size}px`
   const link = document.createElement('a')
   const image = render_canvas
     .toDataURL('image/png')
     .replace('image/png', 'image/octet-stream')
   link.href = image
-  link.download = 'scanimation-render.png'
+  link.download = `${file_name}.png`
   link.click()
   link.remove()
 }
@@ -657,6 +658,7 @@ const download_grid = (format = 'png') => {
   const blobURL = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
+  const file_name = `scanimation-grid-${frames_amount}fr-${slice_size}px`
 
   if (format === 'png') {
     const image = new Image()
@@ -669,7 +671,7 @@ const download_grid = (format = 'png') => {
 
       const png = canvas.toDataURL('image/png')
       link.href = png
-      link.download = 'scanimation-grid.png'
+      link.download = `${file_name}.png`
       link.click()
       link.remove()
     }
@@ -678,7 +680,7 @@ const download_grid = (format = 'png') => {
 
   if (format === 'svg') {
     link.href = blobURL
-    link.download = 'scanimation-grid.svg'
+    link.download = `${file_name}.svg`
     link.click()
     link.remove()
   }
