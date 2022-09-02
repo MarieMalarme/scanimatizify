@@ -213,6 +213,13 @@ label {
   position: absolute;
 }
 
+.displayable-canvas,
+#grids,
+.grid {
+  max-width: 70vh;
+  max-height: 70vh;
+}
+
 #loader {
   position: absolute;
   font-size: 5vw;

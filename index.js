@@ -415,33 +415,32 @@ loader.classList.add('hidden')
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
-// size of the render canvas
-const render_inc = 0.15 // make the render 15% bigger to have white space around
-const render_export_size = shape_viewbox_size + shape_viewbox_size * render_inc // in px to be exported
-const render_display_size = '70vh' // in vh to be displayed on the page
+// set size of the render canvas
+const render_size = 500 // in pixels
+const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
 
 // set render canvas to draw the scanimation image result
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas hidden'
-render_canvas.width = render_export_size // width fitting the svg viewBox width
-render_canvas.height = render_export_size // height fitting the svg viewBox height
-render_canvas.style.width = render_display_size // to do: add as customisable setting in the panel
-render_canvas.style.height = render_display_size // to do: add as customisable setting in the panel
+render_canvas.width = render_size // width fitting the svg viewBox width
+render_canvas.height = render_size // height fitting the svg viewBox height
+render_canvas.style.width = render_size // to do: add as customisable setting in the panel
+render_canvas.style.height = render_size // to do: add as customisable setting in the panel
 body.append(render_canvas)
 
 // set svg to draw the grid to animate the image result
 const grids = document.createElement('div')
 grids.id = 'grids'
 grids.classList.add('hidden')
-const grid_viewbox = `0 0 ${render_export_size} ${render_export_size}`
+const grid_viewbox = `0 0 ${render_size} ${render_size}`
 
 const grid_cutouts = document.createElementNS(w3_url, 'svg')
 grid_cutouts.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 grid_cutouts.setAttribute('viewBox', grid_viewbox)
-grid_cutouts.setAttribute('width', render_display_size)
-grid_cutouts.setAttribute('height', render_display_size)
+grid_cutouts.setAttribute('width', render_size)
+grid_cutouts.setAttribute('height', render_size)
 grid_cutouts.classList.add('grid', 'hidden')
 grid_cutouts.id = 'grid-cutouts'
 grids.append(grid_cutouts)
@@ -449,8 +448,8 @@ grids.append(grid_cutouts)
 const grid_hiders = document.createElementNS(w3_url, 'svg')
 grid_hiders.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 grid_hiders.setAttribute('viewBox', grid_viewbox)
-grid_hiders.setAttribute('width', render_display_size)
-grid_hiders.setAttribute('height', render_display_size)
+grid_hiders.setAttribute('width', render_size)
+grid_hiders.setAttribute('height', render_size)
 grid_hiders.classList.add('grid')
 grid_hiders.id = 'grid-hiders'
 grids.append(grid_hiders)
@@ -494,13 +493,6 @@ grids.addEventListener('mousewheel', (event) => {
 })
 body.append(grid_slider)
 
-// set frame canvas to draw each frame of the animation
-// and copy paste the selected slices on the render canvas
-const frame_canvas = document.createElement('canvas')
-const frame_context = frame_canvas.getContext('2d')
-frame_canvas.width = render_export_size // width fitting the svg viewBox width
-frame_canvas.height = render_export_size // height fitting the svg viewBox height
-
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
@@ -511,7 +503,7 @@ scanimate_button.addEventListener('click', async () => {
   video_button.textContent = 'Play animation'
 
   // clear render canvas & grids to redraw if already drawn on
-  render_context.clearRect(0, 0, render_export_size, render_export_size)
+  render_context.clearRect(0, 0, 4000, 4000) // value that should be big enough to clear everything
   render_canvas.classList.remove('hidden')
   const grid_slices = [...grid_hiders.children, ...grid_cutouts.children]
   grid_slices.forEach((slice) => slice.remove())
@@ -550,15 +542,21 @@ scanimate_button.addEventListener('click', async () => {
   const is_horizontal_axis = animation_axis === 'Horizontal'
 
   // set slice variables according to animation direction
-  const slice_height = is_horizontal_axis ? render_export_size : slice_size
-  const slice_width = is_horizontal_axis ? slice_size : render_export_size
+  const slice_height = is_horizontal_axis ? render_size : slice_size
+  const slice_width = is_horizontal_axis ? slice_size : render_size
 
   // slice the image in equal sections according to the settings
-  const slices_amount = render_export_size / slice_size
+  const slices_amount = render_size / slice_size
 
   // get the total frames amount; in case the loop is on, the amount is increased
   const loop_frames_amount = frames_amount + (frames_amount - 2)
   const frames_amount_sum = loop_on ? loop_frames_amount : frames_amount
+
+  // set size for the frame canvases to be drawn:
+  // make the image smaller to add padding around to have some space to move the grid
+  const render_padding = render_size * render_padding_ratio
+  const frame_canvas_size = render_size - render_padding
+  const frame_ratio = frame_canvas_size / shape_viewbox_size
 
   // create a canvas for each frame to slice the image
   for (let frame = 0; frame < frames_amount_sum; frame++) {
@@ -569,6 +567,15 @@ scanimate_button.addEventListener('click', async () => {
     const frame_step = has_reached_animation_end ? reversed_frame : frame
     const morph_step = frame_step / (frames_amount - 1)
     const frame_path = new Path2D(interpolator(morph_step))
+
+    // draw the frame path on a canvas fitting the render size
+    const frame_canvas = document.createElement('canvas')
+    const frame_context = frame_canvas.getContext('2d')
+    frame_canvas.width = frame_canvas_size
+    frame_canvas.height = frame_canvas_size
+
+    // make the path smaller from the original svg path to fit the render size
+    frame_context.scale(frame_ratio, frame_ratio)
     frame_context.fill(frame_path)
 
     // slice the frame and draw the visible slices to the render:
@@ -582,13 +589,13 @@ scanimate_button.addEventListener('click', async () => {
       const copied_pixels = frame_context.getImageData(...copy_coords)
 
       // set coords to paste the slice to the render canvas
-      const paste_padding = (render_export_size - shape_viewbox_size) / 2
-      const paste_coords = [copy_x + paste_padding, copy_y + paste_padding]
+      const paste_padding = render_padding / 2
+      const paste_coords = [copy_x + paste_padding, copy_y + paste_padding] // add padding around the image
       render_context.putImageData(copied_pixels, ...paste_coords)
     }
 
-    // clear the frame canvas to draw next frame
-    frame_context.clearRect(0, 0, render_export_size, render_export_size)
+    // clear the frame canvas before drawing the next frame
+    frame_canvas.remove()
   }
 
   // create the grid by hiding the slices in equal sections according to the settings
@@ -596,8 +603,8 @@ scanimate_button.addEventListener('click', async () => {
     const hider_x = is_horizontal_axis ? slice * slice_size : 0
     const hider_y = is_horizontal_axis ? 0 : slice * slice_size
     const hider_size = slice_size * (frames_amount_sum - 1)
-    const hider_width = is_horizontal_axis ? hider_size : render_export_size
-    const hider_height = is_horizontal_axis ? render_export_size : hider_size
+    const hider_width = is_horizontal_axis ? hider_size : render_size
+    const hider_height = is_horizontal_axis ? render_size : hider_size
 
     // add the hider to the hiders svg grid
     const hider = document.createElementNS(w3_url, 'rect')
@@ -610,8 +617,8 @@ scanimate_button.addEventListener('click', async () => {
     // add the cutout to the cutouts svg grid
     const cutout_x = is_horizontal_axis ? hider_x + hider_width : 0
     const cutout_y = is_horizontal_axis ? 0 : hider_y + hider_height
-    const cutout_width = is_horizontal_axis ? slice_size : render_export_size
-    const cutout_height = is_horizontal_axis ? render_export_size : slice_size
+    const cutout_width = is_horizontal_axis ? slice_size : render_size
+    const cutout_height = is_horizontal_axis ? render_size : slice_size
 
     const cutout = document.createElementNS(w3_url, 'rect')
     cutout.setAttribute('x', cutout_x)
@@ -694,10 +701,10 @@ const download_grid = (format = 'png') => {
     const image = new Image()
     image.onload = () => {
       const canvas = document.createElement('canvas')
-      canvas.width = render_export_size
-      canvas.height = render_export_size
+      canvas.width = render_size
+      canvas.height = render_size
       const context = canvas.getContext('2d')
-      context.drawImage(image, 0, 0, render_export_size, render_export_size)
+      context.drawImage(image, 0, 0, render_size, render_size)
 
       const png = canvas.toDataURL('image/png')
       link.href = png
