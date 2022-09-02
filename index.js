@@ -653,7 +653,8 @@ scanimation_settings.append(scanimate_button)
 
 // export render in png
 const download_render = () => {
-  const file_name = `scanimation-render-${frames_amount}fr-${slice_size}px`
+  const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
+  const file_name = `scanimation-render-${params}`
   const link = document.createElement('a')
   const image = render_canvas
     .toDataURL('image/png')
@@ -673,7 +674,8 @@ controls_panel.append(download_render_button)
 
 // export grid in svg or png
 const download_grid = (format = 'png') => {
-  const svg = format === 'png' ? grid_hiders : grid_cutouts
+  const is_svg = format === 'svg'
+  const svg = is_svg ? grid_cutouts : grid_hiders
   const cloned_svg = svg.cloneNode(true)
   cloned_svg.removeAttribute('style')
   cloned_svg.removeAttribute('width')
@@ -685,7 +687,8 @@ const download_grid = (format = 'png') => {
   const blobURL = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
-  const file_name = `scanimation-grid-${frames_amount}fr-${slice_size}px`
+  const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
+  const file_name = `scanimation-grid-${is_svg ? 'cutouts-' : ''}${params}`
 
   if (format === 'png') {
     const image = new Image()
