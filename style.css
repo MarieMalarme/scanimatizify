@@ -135,6 +135,7 @@ button.selected {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
+  width: 380px;
 }
 
 #scanimation-settings div {
@@ -170,6 +171,11 @@ select {
 
 label {
   font-size: 14px;
+}
+
+label span {
+  color: rgb(160, 160, 160);
+  margin-left: 5px;
 }
 
 #loop-control {

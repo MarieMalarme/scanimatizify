@@ -312,6 +312,7 @@ body.append(shape_selectors)
 // scanimation fixed settings
 const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
 const animation_axes = ['Horizontal', 'Vertical']
+const px_to_mm = 0.084666667 // 1px equal 0.084666667mm in 300 dpi resolution
 
 // scanimation customizable settings
 let render_size = 500 // in pixels
@@ -332,7 +333,10 @@ controls_panel.append(scanimation_settings)
 // input to set the size of the render
 const size = document.createElement('div')
 const size_label = document.createElement('label')
-size_label.textContent = 'Dimensions [px]'
+size_label.textContent = 'Dimensions in px'
+const size_mm_label = document.createElement('span')
+size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
+size_label.append(size_mm_label)
 const size_input = document.createElement('input')
 size_input.type = 'number'
 size_input.min = 200
@@ -340,6 +344,7 @@ size_input.max = 2000
 size_input.value = render_size
 size_input.addEventListener('input', (event) => {
   render_size = Number(event.target.value)
+  size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
 })
 size.append(size_input)
 size.append(size_label)
@@ -382,7 +387,10 @@ scanimation_settings.append(loop)
 // input to set size of one slice to cut the images
 const slice = document.createElement('div')
 const slice_label = document.createElement('label')
-slice_label.textContent = 'Slice size [px]'
+slice_label.textContent = 'Slice size in px'
+const slice_mm_label = document.createElement('span')
+slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
+slice_label.append(slice_mm_label)
 const slice_input = document.createElement('input')
 slice_input.type = 'number'
 slice_input.min = 1
@@ -390,6 +398,7 @@ slice_input.max = 20
 slice_input.value = slice_size
 slice_input.addEventListener('input', (event) => {
   slice_size = Number(event.target.value)
+  slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
 })
 slice.append(slice_input)
 slice.append(slice_label)
@@ -679,7 +688,7 @@ scanimation_settings.append(scanimate_button)
 // export render in png
 const download_render = () => {
   const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
-  const file_name = `scanimation-render-${params}`
+  const file_name = `scanimation-${params}-render`
   const link = document.createElement('a')
   const image = render_canvas
     .toDataURL('image/png')
@@ -713,7 +722,7 @@ const download_grid = (format = 'png') => {
 
   const link = document.createElement('a')
   const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
-  const file_name = `scanimation-grid-${is_svg ? 'cutouts-' : ''}${params}`
+  const file_name = `scanimation-${params}-grid${is_svg ? '-cutouts' : ''}`
 
   if (format === 'png') {
     const image = new Image()
