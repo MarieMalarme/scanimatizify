@@ -309,12 +309,16 @@ shapes_paths.forEach((shape_path, index) => {
 
 body.append(shape_selectors)
 
-// scanimation settings
+// scanimation fixed settings
+const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
+const animation_axes = ['Horizontal', 'Vertical']
+
+// scanimation customizable settings
+let render_size = 500 // in pixels
 let frames_amount = 4
 let loop_on = true
 let slice_size = 2
 let curves_smoothness = 5
-const animation_axes = ['Horizontal', 'Vertical']
 let animation_axis = animation_axes[0]
 
 const controls_panel = document.createElement('div')
@@ -325,6 +329,22 @@ const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
 controls_panel.append(scanimation_settings)
 
+// input to set the size of the render
+const size = document.createElement('div')
+const size_label = document.createElement('label')
+size_label.textContent = 'Dimensions [px]'
+const size_input = document.createElement('input')
+size_input.type = 'number'
+size_input.min = 200
+size_input.max = 2000
+size_input.value = render_size
+size_input.addEventListener('input', (event) => {
+  render_size = Number(event.target.value)
+})
+size.append(size_input)
+size.append(size_label)
+scanimation_settings.append(size)
+
 // input to set number of frames of the animation
 const frames = document.createElement('div')
 const frames_label = document.createElement('label')
@@ -334,7 +354,7 @@ frames_input.type = 'number'
 frames_input.min = 3
 frames_input.max = 20
 frames_input.value = frames_amount
-frames_input.addEventListener('click', (event) => {
+frames_input.addEventListener('input', (event) => {
   frames_amount = Number(event.target.value)
 })
 frames.append(frames_input)
@@ -362,13 +382,13 @@ scanimation_settings.append(loop)
 // input to set size of one slice to cut the images
 const slice = document.createElement('div')
 const slice_label = document.createElement('label')
-slice_label.textContent = 'Slice size'
+slice_label.textContent = 'Slice size [px]'
 const slice_input = document.createElement('input')
 slice_input.type = 'number'
 slice_input.min = 1
 slice_input.max = 20
 slice_input.value = slice_size
-slice_input.addEventListener('click', (event) => {
+slice_input.addEventListener('input', (event) => {
   slice_size = Number(event.target.value)
 })
 slice.append(slice_input)
@@ -384,7 +404,7 @@ smoothness_input.type = 'number'
 smoothness_input.min = 1
 smoothness_input.max = 10
 smoothness_input.value = curves_smoothness
-smoothness_input.addEventListener('click', (event) => {
+smoothness_input.addEventListener('input', (event) => {
   curves_smoothness = Number(event.target.value)
 })
 smoothness.append(smoothness_input)
@@ -402,7 +422,7 @@ animation_axes.map((direction) => {
   direction_input.append(option)
 })
 direction_input.value = animation_axis
-direction_input.addEventListener('change', (event) => {
+direction_input.addEventListener('input', (event) => {
   animation_axis = event.target.value
 })
 direction.append(direction_input)
@@ -415,41 +435,26 @@ loader.classList.add('hidden')
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
-// set size of the render canvas
-const render_size = 500 // in pixels
-const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
-
 // set render canvas to draw the scanimation image result
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas hidden'
-render_canvas.width = render_size // width fitting the svg viewBox width
-render_canvas.height = render_size // height fitting the svg viewBox height
-render_canvas.style.width = render_size // to do: add as customisable setting in the panel
-render_canvas.style.height = render_size // to do: add as customisable setting in the panel
 body.append(render_canvas)
 
 // set svg to draw the grid to animate the image result
 const grids = document.createElement('div')
 grids.id = 'grids'
 grids.classList.add('hidden')
-const grid_viewbox = `0 0 ${render_size} ${render_size}`
 
 const grid_cutouts = document.createElementNS(w3_url, 'svg')
 grid_cutouts.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-grid_cutouts.setAttribute('viewBox', grid_viewbox)
-grid_cutouts.setAttribute('width', render_size)
-grid_cutouts.setAttribute('height', render_size)
 grid_cutouts.classList.add('grid', 'hidden')
 grid_cutouts.id = 'grid-cutouts'
 grids.append(grid_cutouts)
 
 const grid_hiders = document.createElementNS(w3_url, 'svg')
 grid_hiders.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-grid_hiders.setAttribute('viewBox', grid_viewbox)
-grid_hiders.setAttribute('width', render_size)
-grid_hiders.setAttribute('height', render_size)
 grid_hiders.classList.add('grid')
 grid_hiders.id = 'grid-hiders'
 grids.append(grid_hiders)
@@ -503,10 +508,22 @@ scanimate_button.addEventListener('click', async () => {
   video_button.textContent = 'Play animation'
 
   // clear render canvas & grids to redraw if already drawn on
-  render_context.clearRect(0, 0, 4000, 4000) // value that should be big enough to clear everything
-  render_canvas.classList.remove('hidden')
+  render_context.clearRect(0, 0, 2000, 2000) // value that should be big enough to clear everything
   const grid_slices = [...grid_hiders.children, ...grid_cutouts.children]
   grid_slices.forEach((slice) => slice.remove())
+
+  // set canvas size
+  render_canvas.width = render_size
+  render_canvas.height = render_size
+
+  // set grids size
+  const grid_viewbox = `0 0 ${render_size} ${render_size}`
+  grid_cutouts.setAttribute('viewBox', grid_viewbox)
+  grid_cutouts.setAttribute('width', render_size)
+  grid_cutouts.setAttribute('height', render_size)
+  grid_hiders.setAttribute('viewBox', grid_viewbox)
+  grid_hiders.setAttribute('width', render_size)
+  grid_hiders.setAttribute('height', render_size)
 
   // reset grid slider & position on new scanimation
   translate_grid = 0
@@ -640,6 +657,7 @@ scanimate_button.addEventListener('click', async () => {
 
   // show the scanimation render
   back_button.classList.remove('hidden')
+  render_canvas.classList.remove('hidden')
   grids.classList.remove('hidden')
   grid_hiders.classList.remove('hidden')
   grid_cutouts.classList.add('hidden')
