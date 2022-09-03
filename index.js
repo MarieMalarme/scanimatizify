@@ -75,6 +75,14 @@ const random_color = () => {
   return `hsl(${hue}, ${saturation}%, ${luminosity}%)`
 }
 
+// disable download buttons
+const disable_download = (disabled) => {
+  download_render_button.disabled = disabled
+  download_grid_hiders_button.disabled = disabled
+  download_grid_cutouts_button.disabled = disabled
+  download_settings_button.disabled = disabled
+}
+
 const generate_id = () => Math.random().toString(16).slice(10)
 
 let scanimation_id
@@ -375,6 +383,7 @@ fill_input.id = 'fill_color'
 fill_input.type = 'text'
 fill_input.value = fill_color
 fill_input.addEventListener('input', (event) => {
+  disable_download(true)
   fill_color = event.target.value
   morph_path.setAttribute('fill', fill_color)
 })
@@ -394,6 +403,7 @@ stroke_size_input.min = 0
 stroke_size_input.max = 50
 stroke_size_input.value = stroke_width
 stroke_size_input.addEventListener('input', (event) => {
+  disable_download(true)
   stroke_width = Number(event.target.value)
   morph_path.setAttribute('stroke-width', stroke_width)
 })
@@ -411,6 +421,7 @@ stroke_input.id = 'stroke_color'
 stroke_input.type = 'text'
 stroke_input.value = stroke_color
 stroke_input.addEventListener('input', (event) => {
+  disable_download(true)
   stroke_color = event.target.value
   morph_path.setAttribute('stroke', stroke_color)
 })
@@ -430,6 +441,7 @@ blur_input.min = 0
 blur_input.max = 50
 blur_input.value = blur_filter
 blur_input.addEventListener('input', (event) => {
+  disable_download(true)
   blur_filter = Number(event.target.value)
   morph_blur.setAttribute('stdDeviation', blur_filter)
 })
@@ -447,6 +459,7 @@ grid_fill_input.id = 'grid_color'
 grid_fill_input.type = 'text'
 grid_fill_input.value = grid_color
 grid_fill_input.addEventListener('input', (event) => {
+  disable_download(true)
   grid_color = event.target.value
 })
 grid_fill.append(grid_fill_input)
@@ -476,6 +489,7 @@ size_input.min = 200
 size_input.max = 2000
 size_input.value = render_size
 size_input.addEventListener('input', (event) => {
+  disable_download(true)
   render_size = Number(event.target.value)
   size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
 })
@@ -498,6 +512,7 @@ Object.keys(resolutions).map((resolution) => {
 })
 resolution_input.value = '150'
 resolution_input.addEventListener('input', (event) => {
+  disable_download(true)
   px_to_mm = resolutions[event.target.value]
   slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
   size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
@@ -518,6 +533,7 @@ frames_input.min = 3
 frames_input.max = 20
 frames_input.value = frames_amount
 frames_input.addEventListener('input', (event) => {
+  disable_download(true)
   frames_amount = Number(event.target.value)
 })
 frames.append(frames_input)
@@ -535,6 +551,7 @@ loop_switch.id = 'loop'
 loop_switch.classList.add('switch', 'active')
 loop_switch.value = loop_on
 loop_switch.addEventListener('click', () => {
+  disable_download(true)
   loop_on = !loop_on
   loop_switch.classList.toggle('active')
   loop_switch.value = loop_on
@@ -560,6 +577,7 @@ slice_input.min = 1
 slice_input.max = 20
 slice_input.value = slice_size
 slice_input.addEventListener('input', (event) => {
+  disable_download(true)
   slice_size = Number(event.target.value)
   slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
 })
@@ -580,6 +598,7 @@ smoothness_input.min = 1
 smoothness_input.max = 10
 smoothness_input.value = curves_smoothness
 smoothness_input.addEventListener('input', (event) => {
+  disable_download(true)
   curves_smoothness = Number(event.target.value)
 })
 smoothness.append(smoothness_input)
@@ -600,6 +619,7 @@ animation_axes.map((direction) => {
 })
 direction_input.value = animation_axis
 direction_input.addEventListener('input', (event) => {
+  disable_download(true)
   animation_axis = event.target.value
 })
 direction.append(direction_input)
@@ -732,10 +752,7 @@ scanimate_button.addEventListener('click', async () => {
   grids.style.transform = `translate(0px)`
 
   // disable download buttons
-  download_render_button.disabled = true
-  download_grid_hiders_button.disabled = true
-  download_grid_cutouts_button.disabled = true
-  download_settings_button.disabled = true
+  disable_download(true)
 
   // hide the animation playground
   morph_shape.classList.add('hidden')
@@ -881,10 +898,7 @@ scanimate_button.addEventListener('click', async () => {
   set_grid_mode_button.textContent = 'See cutouts'
 
   // enable download buttons
-  download_render_button.disabled = false
-  download_grid_hiders_button.disabled = false
-  download_grid_cutouts_button.disabled = false
-  download_settings_button.disabled = false
+  disable_download(false)
 })
 
 scanimation_settings.append(scanimate_button)
