@@ -76,6 +76,7 @@ const random_color = () => {
 
 // morph path customizable settings
 let blur_filter = 20
+let fill_color = 'black'
 
 const draw_svg_path = (path_coords = '') => {
   // create the svg shape
@@ -95,7 +96,7 @@ const draw_svg_path = (path_coords = '') => {
   // create the morph path
   const path = document.createElementNS(w3_url, 'path')
   path.setAttribute('d', path_coords)
-  path.setAttribute('fill', 'black')
+  path.setAttribute('fill', fill_color)
   path.setAttribute('stroke', 'white')
   path.setAttribute('stroke-width', '70px')
   path.setAttribute('filter', 'url(#blur)')
@@ -347,9 +348,31 @@ const controls_panel = document.createElement('div')
 controls_panel.id = 'controls-panel'
 body.append(controls_panel)
 
-const scanimation_settings = document.createElement('div')
-scanimation_settings.id = 'scanimation-settings'
-controls_panel.append(scanimation_settings)
+// panel for morph path settings
+const morph_path_settings = document.createElement('div')
+morph_path_settings.id = 'morph-path-settings'
+morph_path_settings.className = 'settings-panel'
+morph_path_settings_label = document.createElement('p')
+morph_path_settings_label.textContent = 'Path settings'
+morph_path_settings.append(morph_path_settings_label)
+controls_panel.append(morph_path_settings)
+
+// input to set the path fill color
+const fill = document.createElement('div')
+const fill_label = document.createElement('label')
+fill_label.textContent = 'Fill color'
+const fill_input = document.createElement('input')
+fill_input.type = 'text'
+fill_input.min = 0
+fill_input.max = 50
+fill_input.value = fill_color
+fill_input.addEventListener('input', (event) => {
+  fill_color = event.target.value
+  morph_path.setAttribute('fill', fill_color)
+})
+fill.append(fill_input)
+fill.append(fill_label)
+morph_path_settings.append(fill)
 
 // input to set the blur effect
 const blur = document.createElement('div')
@@ -366,7 +389,16 @@ blur_input.addEventListener('input', (event) => {
 })
 blur.append(blur_input)
 blur.append(blur_label)
-scanimation_settings.append(blur)
+morph_path_settings.append(blur)
+
+// panel for scanimation settings
+const scanimation_settings = document.createElement('div')
+scanimation_settings.id = 'scanimation-settings'
+scanimation_settings.className = 'settings-panel'
+scanimation_settings_label = document.createElement('p')
+scanimation_settings_label.textContent = 'Scanimation settings'
+scanimation_settings.append(scanimation_settings_label)
+controls_panel.append(scanimation_settings)
 
 // input to set the size of the render
 const size = document.createElement('div')
@@ -670,6 +702,7 @@ scanimate_button.addEventListener('click', async () => {
 
     // draw the frame step path on the frame svg
     frame_path.setAttribute('d', interpolator(morph_step))
+    frame_path.setAttribute('fill', fill_color)
     frame_blur.setAttribute('stdDeviation', blur_filter)
 
     // create a url for the svg

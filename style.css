@@ -128,7 +128,7 @@ button.selected {
   flex-direction: column;
 }
 
-#scanimation-settings {
+.settings-panel {
   border: solid 1px black;
   border-radius: 15px;
   padding: 25px;
@@ -138,8 +138,13 @@ button.selected {
   width: 380px;
 }
 
-#scanimation-settings div {
+.settings-panel div:not(:last-child) {
   margin-bottom: 10px;
+}
+
+.settings-panel p {
+  margin-bottom: 25px;
+  opacity: 0.45;
 }
 
 button.download {
@@ -204,12 +209,12 @@ label span {
   left: 75px;
 }
 
-#scanimation-settings div.switch {
+.settings-panel div.switch {
   margin-bottom: 0;
 }
 
 #scanimate-button {
-  margin-top: 5px;
+  margin-top: 15px;
   padding: 5px 10px;
   background: black;
   color: white;
