@@ -74,26 +74,42 @@ const random_color = () => {
   return `hsl(${hue}, ${saturation}%, ${luminosity}%)`
 }
 
+const draw_svg_path = (path_coords = '') => {
+  // create the svg shape
+  const svg = document.createElementNS(w3_url, 'svg')
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  svg.setAttribute('viewBox', `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`)
+
+  // create the blur filter for the path
+  const blur_filter = document.createElementNS(w3_url, 'filter')
+  blur_filter.id = 'blur'
+  const gaussian_blur = document.createElementNS(w3_url, 'feGaussianBlur')
+  gaussian_blur.setAttribute('in', 'SourceGraphic')
+  gaussian_blur.setAttribute('stdDeviation', '20')
+  blur_filter.append(gaussian_blur)
+  svg.append(blur_filter)
+
+  // create the morph path
+  const path = document.createElementNS(w3_url, 'path')
+  path.setAttribute('d', path_coords)
+  path.setAttribute('fill', 'black')
+  path.setAttribute('stroke', 'white')
+  path.setAttribute('stroke-width', '70px')
+  path.setAttribute('filter', 'url(#blur)')
+  svg.append(path)
+
+  return [svg, path]
+}
+
 // set up the html elements
-// create the container
-const shape = document.createElement('div')
-shape.id = 'shape'
-
-// create the svg shape
-const svg = document.createElementNS(w3_url, 'svg')
 const shape_viewbox_size = 1000
-svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-svg.setAttribute('viewBox', `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`)
 
-// create the path
-const morph_path = document.createElementNS(w3_url, 'path')
-morph_path.setAttribute('d', morph_paths.start)
-morph_path.setAttribute('fill', 'blueviolet')
-
-// append all elements
-svg.append(morph_path)
-shape.append(svg)
-body.append(shape)
+// create the morphing shape
+const morph_shape = document.createElement('div')
+morph_shape.id = 'shape'
+const [morph_svg, morph_path] = draw_svg_path(morph_paths.start)
+morph_shape.append(morph_svg)
+body.append(morph_shape)
 
 let interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
 
@@ -473,17 +489,19 @@ render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas hidden'
 body.append(render_canvas)
 
-// set svg to draw the grid to animate the image result
+// set container to draw the grids to animate the image result
 const grids = document.createElement('div')
 grids.id = 'grids'
 grids.classList.add('hidden')
 
+// set svg grid cutouts
 const grid_cutouts = document.createElementNS(w3_url, 'svg')
 grid_cutouts.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 grid_cutouts.classList.add('grid', 'hidden')
 grid_cutouts.id = 'grid-cutouts'
 grids.append(grid_cutouts)
 
+// set svg grid printable
 const grid_hiders = document.createElementNS(w3_url, 'svg')
 grid_hiders.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 grid_hiders.classList.add('grid')
@@ -529,6 +547,14 @@ grids.addEventListener('mousewheel', (event) => {
 })
 body.append(grid_slider)
 
+// set frame svg to draw each path frame with blur effect kept
+const [frame_svg, frame_path] = draw_svg_path()
+
+// set frame canvas to draw each svg frame with effect before slicing
+const frame_canvas = document.createElement('canvas')
+frame_canvas.className = 'frame-canvas'
+const frame_context = frame_canvas.getContext('2d')
+
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
@@ -569,6 +595,11 @@ scanimate_button.addEventListener('click', async () => {
   download_grid_hiders_button.disabled = true
   download_grid_cutouts_button.disabled = true
 
+  // hide the animation playground
+  morph_shape.classList.add('hidden')
+  video_button.classList.add('hidden')
+  shape_selectors.classList.add('hidden')
+
   // hide scanimation render
   grid_slider.classList.add('hidden')
   grid_label.classList.add('hidden')
@@ -600,13 +631,15 @@ scanimate_button.addEventListener('click', async () => {
   const loop_frames_amount = frames_amount + (frames_amount - 2)
   const frames_amount_sum = loop_on ? loop_frames_amount : frames_amount
 
-  // set size for the frame canvases to be drawn:
-  // make the image smaller to add padding around to have some space to move the grid
+  // set size for the frame canvas to be drawn calibrated on the render size:
+  // make the image a bit smaller to add padding around to have some space to move the grid
   const render_padding = render_size * render_padding_ratio
   const frame_canvas_size = render_size - render_padding
   const frame_ratio = frame_canvas_size / shape_viewbox_size
+  frame_canvas.width = frame_canvas_size
+  frame_canvas.height = frame_canvas_size
 
-  // create a canvas for each frame to slice the image
+  // draw on the canvas for each frame to then slice the image
   for (let frame = 0; frame < frames_amount_sum; frame++) {
     // draw the corresponding morph steph path
     // if the loop is on, past the last animation frame, the frames go reverse
@@ -614,39 +647,51 @@ scanimate_button.addEventListener('click', async () => {
     const reversed_frame = frame - (frame - (frames_amount - 1)) * 2
     const frame_step = has_reached_animation_end ? reversed_frame : frame
     const morph_step = frame_step / (frames_amount - 1)
-    const frame_path = new Path2D(interpolator(morph_step))
 
-    // draw the frame path on a canvas fitting the render size
-    const frame_canvas = document.createElement('canvas')
-    const frame_context = frame_canvas.getContext('2d')
-    frame_canvas.width = frame_canvas_size
-    frame_canvas.height = frame_canvas_size
+    // draw the frame step path on the frame svg
+    frame_path.setAttribute('d', interpolator(morph_step))
 
-    // make the path smaller from the original svg path to fit the render size
-    frame_context.scale(frame_ratio, frame_ratio)
-    frame_context.fill(frame_path)
+    // create a url for the svg
+    const { outerHTML: svg_html } = frame_svg
+    const blob = new Blob([svg_html], { type: 'image/svg+xml;charset=utf-8' })
+    const URL = window.URL || window.webkitURL || window
+    const blobURL = URL.createObjectURL(blob)
 
-    // slice the frame and draw the visible slices to the render:
-    // first slice to display starts from the current frame, then jump to next slice that
-    // has to be drawn; ignore slices in between that will be the other frames' slices
-    for (let slice = frame; slice < slices_amount; slice += frames_amount_sum) {
-      // get coords to copy the slice from the frame canvas
-      const copy_x = is_horizontal_axis ? slice * slice_size : 0
-      const copy_y = is_horizontal_axis ? 0 : slice * slice_size
-      const copy_coords = [copy_x, copy_y, slice_width, slice_height]
-      const copied_pixels = frame_context.getImageData(...copy_coords)
+    // convert the svg as an image from the url
+    const path_image = new Image()
+    path_image.src = blobURL
+    path_image.onload = () => {
+      // draw the image on the frame canvas
+      const draw_image_coords = [0, 0, frame_canvas_size, frame_canvas_size]
+      frame_context.drawImage(path_image, ...draw_image_coords)
 
-      // set coords to paste the slice to the render canvas
-      const paste_padding = render_padding / 2
-      const paste_coords = [copy_x + paste_padding, copy_y + paste_padding] // add padding around the image
-      render_context.putImageData(copied_pixels, ...paste_coords)
+      // slice the image frame and draw the visible slices to the render:
+      // first slice to display starts from the current frame, then jump to next slice that
+      // has to be drawn; ignore slices in between that will be the other frames' slices
+      for (
+        let slice = frame;
+        slice < slices_amount;
+        slice += frames_amount_sum
+      ) {
+        // get coords to copy the slice from the frame canvas
+        const copy_x = is_horizontal_axis ? slice * slice_size : 0
+        const copy_y = is_horizontal_axis ? 0 : slice * slice_size
+        const copy_coords = [copy_x, copy_y, slice_width, slice_height]
+        const copied_pixels = frame_context.getImageData(...copy_coords)
+
+        // set coords to paste the slice to the render canvas
+        const paste_padding = render_padding / 2
+        const paste_coords = [copy_x + paste_padding, copy_y + paste_padding] // add padding around the image
+        render_context.putImageData(copied_pixels, ...paste_coords)
+      }
+
+      // clear the frame canvas before drawing the next frame
+      frame_context.clearRect(0, 0, 2000, 2000)
+      URL.revokeObjectURL(blobURL)
     }
-
-    // clear the frame canvas before drawing the next frame
-    frame_canvas.remove()
   }
 
-  // create the grid by hiding the slices in equal sections according to the settings
+  // create the grids by hiding the slices in equal sections according to the settings
   for (let slice = 0; slice < slices_amount; slice += frames_amount_sum) {
     const hider_x = is_horizontal_axis ? slice * slice_size : 0
     const hider_y = is_horizontal_axis ? 0 : slice * slice_size
@@ -680,11 +725,6 @@ scanimate_button.addEventListener('click', async () => {
   // remove the loader & enable pointer events
   loader.classList.add('hidden')
   body.style.pointerEvents = 'all'
-
-  // hide the animation playground
-  shape.classList.add('hidden')
-  video_button.classList.add('hidden')
-  shape_selectors.classList.add('hidden')
 
   // show the scanimation render
   back_button.classList.remove('hidden')
@@ -730,8 +770,10 @@ controls_panel.append(download_render_button)
 
 // export grid in svg or png
 const download_grid = (format = 'png') => {
-  const is_svg = format === 'svg'
-  const svg = is_svg ? grid_cutouts : grid_hiders
+  const svg_format = format === 'svg'
+  const png_format = format === 'png'
+
+  const svg = svg_format ? grid_cutouts : grid_hiders
   const cloned_svg = svg.cloneNode(true)
   cloned_svg.removeAttribute('style')
   cloned_svg.removeAttribute('width')
@@ -744,9 +786,9 @@ const download_grid = (format = 'png') => {
 
   const link = document.createElement('a')
   const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
-  const file_name = `scanimation-${params}-grid${is_svg ? '-cutouts' : ''}`
+  const file_name = `scanimation-${params}-grid${svg_format ? '-cutouts' : ''}`
 
-  if (format === 'png') {
+  if (png_format) {
     const image = new Image()
     image.onload = () => {
       const canvas = document.createElement('canvas')
@@ -764,7 +806,7 @@ const download_grid = (format = 'png') => {
     image.src = blobURL
   }
 
-  if (format === 'svg') {
+  if (svg_format) {
     link.href = blobURL
     link.download = `${file_name}.svg`
     link.click()
@@ -807,7 +849,7 @@ back_button.addEventListener('click', () => {
   grid_label.classList.add('hidden')
 
   // show the animation playground
-  shape.classList.remove('hidden')
+  morph_shape.classList.remove('hidden')
   video_button.classList.remove('hidden')
   shape_selectors.classList.remove('hidden')
 })
