@@ -75,9 +75,10 @@ const random_color = () => {
 }
 
 // morph path customizable settings
-let blur_filter = 20
 let fill_color = 'black'
-let stroke_width = 10
+let stroke_width = 40
+let stroke_color = 'lime'
+let blur_filter = 24
 
 const draw_svg_path = (path_coords = '') => {
   // create the svg shape
@@ -98,8 +99,8 @@ const draw_svg_path = (path_coords = '') => {
   const path = document.createElementNS(w3_url, 'path')
   path.setAttribute('d', path_coords)
   path.setAttribute('fill', fill_color)
-  path.setAttribute('stroke', 'white')
   path.setAttribute('stroke-width', `${stroke_width}px`)
+  path.setAttribute('stroke', stroke_color)
   path.setAttribute('filter', 'url(#blur)')
   svg.append(path)
 
@@ -364,8 +365,6 @@ const fill_label = document.createElement('label')
 fill_label.textContent = 'Fill color'
 const fill_input = document.createElement('input')
 fill_input.type = 'text'
-fill_input.min = 0
-fill_input.max = 50
 fill_input.value = fill_color
 fill_input.addEventListener('input', (event) => {
   fill_color = event.target.value
@@ -376,17 +375,32 @@ fill.append(fill_label)
 morph_path_settings.append(fill)
 
 // input to set the path stroke width
+const stroke_size = document.createElement('div')
+const stroke_size_label = document.createElement('label')
+stroke_size_label.textContent = 'Stroke width'
+const stroke_size_input = document.createElement('input')
+stroke_size_input.type = 'number'
+stroke_size_input.min = 0
+stroke_size_input.max = 50
+stroke_size_input.value = stroke_width
+stroke_size_input.addEventListener('input', (event) => {
+  stroke_width = Number(event.target.value)
+  morph_path.setAttribute('stroke-width', stroke_width)
+})
+stroke_size.append(stroke_size_input)
+stroke_size.append(stroke_size_label)
+morph_path_settings.append(stroke_size)
+
+// input to set the path stroke color
 const stroke = document.createElement('div')
 const stroke_label = document.createElement('label')
-stroke_label.textContent = 'Stroke width'
+stroke_label.textContent = 'Stroke color'
 const stroke_input = document.createElement('input')
-stroke_input.type = 'number'
-stroke_input.min = 0
-stroke_input.max = 50
-stroke_input.value = stroke_width
+stroke_input.type = 'text'
+stroke_input.value = stroke_color
 stroke_input.addEventListener('input', (event) => {
-  stroke_width = Number(event.target.value)
-  morph_path.setAttribute('stroke-width', `${stroke_width}px`)
+  stroke_color = event.target.value
+  morph_path.setAttribute('stroke', stroke_color)
 })
 stroke.append(stroke_input)
 stroke.append(stroke_label)
@@ -721,6 +735,7 @@ scanimate_button.addEventListener('click', async () => {
     // draw the frame step path on the frame svg
     frame_path.setAttribute('d', interpolator(morph_step))
     frame_path.setAttribute('fill', fill_color)
+    frame_path.setAttribute('stroke', stroke_color)
     frame_path.setAttribute('stroke-width', `${stroke_width}px`)
     frame_blur.setAttribute('stdDeviation', blur_filter)
 
