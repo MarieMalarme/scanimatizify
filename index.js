@@ -74,6 +74,9 @@ const random_color = () => {
   return `hsl(${hue}, ${saturation}%, ${luminosity}%)`
 }
 
+// morph path customizable settings
+let blur_filter = 20
+
 const draw_svg_path = (path_coords = '') => {
   // create the svg shape
   const svg = document.createElementNS(w3_url, 'svg')
@@ -81,13 +84,13 @@ const draw_svg_path = (path_coords = '') => {
   svg.setAttribute('viewBox', `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`)
 
   // create the blur filter for the path
-  const blur_filter = document.createElementNS(w3_url, 'filter')
-  blur_filter.id = 'blur'
+  const filter = document.createElementNS(w3_url, 'filter')
+  filter.id = 'blur'
   const gaussian_blur = document.createElementNS(w3_url, 'feGaussianBlur')
   gaussian_blur.setAttribute('in', 'SourceGraphic')
-  gaussian_blur.setAttribute('stdDeviation', '20')
-  blur_filter.append(gaussian_blur)
-  svg.append(blur_filter)
+  gaussian_blur.setAttribute('stdDeviation', blur_filter)
+  filter.append(gaussian_blur)
+  svg.append(filter)
 
   // create the morph path
   const path = document.createElementNS(w3_url, 'path')
@@ -98,7 +101,7 @@ const draw_svg_path = (path_coords = '') => {
   path.setAttribute('filter', 'url(#blur)')
   svg.append(path)
 
-  return [svg, path]
+  return [svg, path, gaussian_blur]
 }
 
 // set up the html elements
@@ -107,7 +110,7 @@ const shape_viewbox_size = 1000
 // create the morphing shape
 const morph_shape = document.createElement('div')
 morph_shape.id = 'shape'
-const [morph_svg, morph_path] = draw_svg_path(morph_paths.start)
+const [morph_svg, morph_path, morph_blur] = draw_svg_path(morph_paths.start)
 morph_shape.append(morph_svg)
 body.append(morph_shape)
 
@@ -348,6 +351,23 @@ const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
 controls_panel.append(scanimation_settings)
 
+// input to set the blur effect
+const blur = document.createElement('div')
+const blur_label = document.createElement('label')
+blur_label.textContent = 'Blur effect'
+const blur_input = document.createElement('input')
+blur_input.type = 'number'
+blur_input.min = 0
+blur_input.max = 50
+blur_input.value = blur_filter
+blur_input.addEventListener('input', (event) => {
+  blur_filter = Number(event.target.value)
+  morph_blur.setAttribute('stdDeviation', blur_filter)
+})
+blur.append(blur_input)
+blur.append(blur_label)
+scanimation_settings.append(blur)
+
 // input to set the size of the render
 const size = document.createElement('div')
 const size_label = document.createElement('label')
@@ -548,7 +568,7 @@ grids.addEventListener('mousewheel', (event) => {
 body.append(grid_slider)
 
 // set frame svg to draw each path frame with blur effect kept
-const [frame_svg, frame_path] = draw_svg_path()
+const [frame_svg, frame_path, frame_blur] = draw_svg_path()
 
 // set frame canvas to draw each svg frame with effect before slicing
 const frame_canvas = document.createElement('canvas')
@@ -650,6 +670,7 @@ scanimate_button.addEventListener('click', async () => {
 
     // draw the frame step path on the frame svg
     frame_path.setAttribute('d', interpolator(morph_step))
+    frame_blur.setAttribute('stdDeviation', blur_filter)
 
     // create a url for the svg
     const { outerHTML: svg_html } = frame_svg
