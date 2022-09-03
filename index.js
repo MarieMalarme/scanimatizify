@@ -312,10 +312,12 @@ body.append(shape_selectors)
 // scanimation fixed settings
 const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
 const animation_axes = ['Horizontal', 'Vertical']
-const px_to_mm = 0.084666667 // 1px equal 0.084666667mm in 300 dpi resolution
+const resolutions = { 72: 0.352777778, 150: 0.169333333, 300: 0.084666667 } // conversion for 1 px in mm for each resolution
+// 1px = 0.352777778mm in 72 dpi / 1px = 0.169333333mm in 300 dpi / 1px = 0.084666667mm in 300 dpi
 
 // scanimation customizable settings
 let render_size = 500 // in pixels
+let px_to_mm = resolutions['150'] // resolution of 150 dpi by default
 let frames_amount = 4
 let loop_on = true
 let slice_size = 2
@@ -349,6 +351,26 @@ size_input.addEventListener('input', (event) => {
 size.append(size_input)
 size.append(size_label)
 scanimation_settings.append(size)
+
+// input to set the resolution of the render
+const resolution = document.createElement('div')
+const resolution_label = document.createElement('label')
+resolution_label.textContent = 'Render resolution in dpi'
+const resolution_input = document.createElement('select')
+Object.keys(resolutions).map((resolution) => {
+  const option = document.createElement('option')
+  option.text = resolution
+  resolution_input.append(option)
+})
+resolution_input.value = '150'
+resolution_input.addEventListener('input', (event) => {
+  px_to_mm = resolutions[event.target.value]
+  slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
+  size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
+})
+resolution.append(resolution_input)
+resolution.append(resolution_label)
+scanimation_settings.append(resolution)
 
 // input to set number of frames of the animation
 const frames = document.createElement('div')
