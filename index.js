@@ -75,6 +75,10 @@ const random_color = () => {
   return `hsl(${hue}, ${saturation}%, ${luminosity}%)`
 }
 
+const generate_id = () => Math.random().toString(16).slice(10)
+
+let scanimation_id
+
 // morph path customizable settings
 let fill_color = 'black'
 let stroke_width = 40
@@ -686,6 +690,9 @@ const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
 scanimate_button.addEventListener('click', async () => {
+  // set scanimation id for downloads
+  scanimation_id = generate_id()
+
   // pause video
   paused = true
   video_button.textContent = 'Play animation'
@@ -884,15 +891,8 @@ scanimation_settings.append(scanimate_button)
 
 // export render in png
 const download_render = () => {
-  const frames = `${frames_amount}fr`
-  const slice = `${slice_size}px`
-  const resolution = `${resolution_input.value}dpi`
-  const loop = loop_on ? '-loop' : ''
-
-  const params = `${frames}-${slice}-${resolution}${loop}`
-  const file_name = `scanimation-${params}-render`
-
   const link = document.createElement('a')
+  const file_name = `scanimation-${scanimation_id}-render`
   const image = render_canvas
     .toDataURL('image/png')
     .replace('image/png', 'image/octet-stream')
@@ -927,13 +927,8 @@ const download_grid = (format = 'png') => {
 
   const link = document.createElement('a')
 
-  const frames = `${frames_amount}fr`
-  const slice = `${slice_size}px`
-  const resolution = `${resolution_input.value}dpi`
-  const loop = loop_on ? '-loop' : ''
-
-  const params = `${frames}-${slice}-${resolution}${loop}`
-  const file_name = `scanimation-${params}-grid${svg_format ? '-cutouts' : ''}`
+  const file_name_suffix = `${svg_format ? '-cutouts' : ''}`
+  const file_name = `scanimation-${scanimation_id}-grid${file_name_suffix}`
 
   if (png_format) {
     const image = new Image()
@@ -988,7 +983,7 @@ const download_settings = () => {
   const date = `${pad_start0(day)}.${pad_start0(month)}.${year}`
 
   // create the text with all the custom settings from the inputs
-  let text = `Scanimation generated on ${date}\n\n`
+  let text = `Scanimation #${scanimation_id} generated on ${date}\n\n`
   const inputs_css_query = `input:not([type='range']), select, .switch`
   const inputs = document.querySelectorAll(inputs_css_query)
   inputs.forEach((input) => {
@@ -1000,7 +995,7 @@ const download_settings = () => {
 
   const link = document.createElement('a')
   link.setAttribute('href', data)
-  link.setAttribute('download', 'scanimation-settings.txt')
+  link.setAttribute('download', `scanimation-${scanimation_id}-settings.txt`)
   link.click()
   link.remove()
 }
