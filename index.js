@@ -60,6 +60,7 @@ let morph_paths = { start: default_paths.start, end: default_paths.end }
 // functions
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 const round = (number) => Math.round((number + Number.EPSILON) * 100) / 100
+const pad_start0 = (string) => string.toString().padStart(2, '0')
 
 const random_int = (min, max) => {
   min = Math.ceil(min)
@@ -363,8 +364,10 @@ controls_panel.append(morph_path_settings)
 // input to set the path fill color
 const fill = document.createElement('div')
 const fill_label = document.createElement('label')
+fill_label.htmlFor = 'fill_color'
 fill_label.textContent = 'Fill color'
 const fill_input = document.createElement('input')
+fill_input.id = 'fill_color'
 fill_input.type = 'text'
 fill_input.value = fill_color
 fill_input.addEventListener('input', (event) => {
@@ -378,8 +381,10 @@ morph_path_settings.append(fill)
 // input to set the path stroke width
 const stroke_size = document.createElement('div')
 const stroke_size_label = document.createElement('label')
+stroke_size_label.htmlFor = 'stroke_width'
 stroke_size_label.textContent = 'Stroke width'
 const stroke_size_input = document.createElement('input')
+stroke_size_input.id = 'stroke_width'
 stroke_size_input.type = 'number'
 stroke_size_input.min = 0
 stroke_size_input.max = 50
@@ -395,8 +400,10 @@ morph_path_settings.append(stroke_size)
 // input to set the path stroke color
 const stroke = document.createElement('div')
 const stroke_label = document.createElement('label')
+stroke_label.htmlFor = 'stroke_color'
 stroke_label.textContent = 'Stroke color'
 const stroke_input = document.createElement('input')
+stroke_input.id = 'stroke_color'
 stroke_input.type = 'text'
 stroke_input.value = stroke_color
 stroke_input.addEventListener('input', (event) => {
@@ -410,8 +417,10 @@ morph_path_settings.append(stroke)
 // input to set the blur effect
 const blur = document.createElement('div')
 const blur_label = document.createElement('label')
+blur_label.htmlFor = 'blur_filter'
 blur_label.textContent = 'Blur effect'
 const blur_input = document.createElement('input')
+blur_input.id = 'blur_filter'
 blur_input.type = 'number'
 blur_input.min = 0
 blur_input.max = 50
@@ -427,8 +436,10 @@ morph_path_settings.append(blur)
 // input to set the grid color
 const grid_fill = document.createElement('div')
 const grid_fill_label = document.createElement('label')
+grid_fill_label.htmlFor = 'grid_color'
 grid_fill_label.textContent = 'Grid color'
 const grid_fill_input = document.createElement('input')
+grid_fill_input.id = 'grid_color'
 grid_fill_input.type = 'text'
 grid_fill_input.value = grid_color
 grid_fill_input.addEventListener('input', (event) => {
@@ -450,11 +461,12 @@ controls_panel.append(scanimation_settings)
 // input to set the size of the render
 const size = document.createElement('div')
 const size_label = document.createElement('label')
+size_label.htmlFor = 'render_size'
 size_label.textContent = 'Dimensions in px'
 const size_mm_label = document.createElement('span')
 size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
-size_label.append(size_mm_label)
 const size_input = document.createElement('input')
+size_input.id = 'render_size'
 size_input.type = 'number'
 size_input.min = 200
 size_input.max = 2000
@@ -465,13 +477,16 @@ size_input.addEventListener('input', (event) => {
 })
 size.append(size_input)
 size.append(size_label)
+size.append(size_mm_label)
 scanimation_settings.append(size)
 
 // input to set the resolution of the render
 const resolution = document.createElement('div')
 const resolution_label = document.createElement('label')
+resolution_label.htmlFor = 'resolution'
 resolution_label.textContent = 'Render resolution in dpi'
 const resolution_input = document.createElement('select')
+resolution_input.id = 'resolution'
 Object.keys(resolutions).map((resolution) => {
   const option = document.createElement('option')
   option.text = resolution
@@ -490,8 +505,10 @@ scanimation_settings.append(resolution)
 // input to set number of frames of the animation
 const frames = document.createElement('div')
 const frames_label = document.createElement('label')
+frames_label.htmlFor = 'frames_amount'
 frames_label.textContent = 'Frames'
 const frames_input = document.createElement('input')
+frames_input.id = 'frames_amount'
 frames_input.type = 'number'
 frames_input.min = 3
 frames_input.max = 20
@@ -507,14 +524,18 @@ scanimation_settings.append(frames)
 const loop = document.createElement('div')
 loop.id = 'loop-control'
 const loop_label = document.createElement('label')
+loop_label.htmlFor = 'loop'
 loop_label.textContent = 'Loop animation'
 const loop_switch = document.createElement('div')
+loop_switch.id = 'loop'
 loop_switch.classList.add('switch', 'active')
+loop_switch.value = loop_on
 loop_switch.addEventListener('click', () => {
   loop_on = !loop_on
   loop_switch.classList.toggle('active')
+  loop_switch.value = loop_on
 })
-const loop_switch_dot = document.createElement('span')
+const loop_switch_dot = document.createElement('div')
 loop_switch_dot.classList.add('switch-dot')
 loop_switch.append(loop_switch_dot)
 loop.append(loop_switch)
@@ -524,11 +545,12 @@ scanimation_settings.append(loop)
 // input to set size of one slice to cut the images
 const slice = document.createElement('div')
 const slice_label = document.createElement('label')
+slice_label.htmlFor = 'slice_size'
 slice_label.textContent = 'Slice size in px'
 const slice_mm_label = document.createElement('span')
 slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
-slice_label.append(slice_mm_label)
 const slice_input = document.createElement('input')
+slice_input.id = 'slice_size'
 slice_input.type = 'number'
 slice_input.min = 1
 slice_input.max = 20
@@ -539,13 +561,16 @@ slice_input.addEventListener('input', (event) => {
 })
 slice.append(slice_input)
 slice.append(slice_label)
+slice.append(slice_mm_label)
 scanimation_settings.append(slice)
 
 // input to set smoothness of curves for morphing
 const smoothness = document.createElement('div')
 const smoothness_label = document.createElement('label')
+smoothness_label.htmlFor = 'curve_smoothness'
 smoothness_label.textContent = 'Curve smoothness'
 const smoothness_input = document.createElement('input')
+smoothness_input.id = 'curve_smoothness'
 smoothness_input.type = 'number'
 smoothness_input.min = 1
 smoothness_input.max = 10
@@ -560,8 +585,10 @@ scanimation_settings.append(smoothness)
 // input to set direction of the animation
 const direction = document.createElement('div')
 const direction_label = document.createElement('label')
+direction_label.htmlFor = 'animation_axis'
 direction_label.textContent = 'Animation direction'
 const direction_input = document.createElement('select')
+direction_input.id = 'animation_axis'
 animation_axes.map((direction) => {
   const option = document.createElement('option')
   option.text = direction
@@ -701,6 +728,7 @@ scanimate_button.addEventListener('click', async () => {
   download_render_button.disabled = true
   download_grid_hiders_button.disabled = true
   download_grid_cutouts_button.disabled = true
+  download_settings_button.disabled = true
 
   // hide the animation playground
   morph_shape.classList.add('hidden')
@@ -849,14 +877,21 @@ scanimate_button.addEventListener('click', async () => {
   download_render_button.disabled = false
   download_grid_hiders_button.disabled = false
   download_grid_cutouts_button.disabled = false
+  download_settings_button.disabled = false
 })
 
 scanimation_settings.append(scanimate_button)
 
 // export render in png
 const download_render = () => {
-  const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
+  const frames = `${frames_amount}fr`
+  const slice = `${slice_size}px`
+  const resolution = `${resolution_input.value}dpi`
+  const loop = loop_on ? '-loop' : ''
+
+  const params = `${frames}-${slice}-${resolution}${loop}`
   const file_name = `scanimation-${params}-render`
+
   const link = document.createElement('a')
   const image = render_canvas
     .toDataURL('image/png')
@@ -891,7 +926,13 @@ const download_grid = (format = 'png') => {
   const blobURL = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
-  const params = `${frames_amount}fr-${slice_size}px${loop_on ? '-loop' : ''}`
+
+  const frames = `${frames_amount}fr`
+  const slice = `${slice_size}px`
+  const resolution = `${resolution_input.value}dpi`
+  const loop = loop_on ? '-loop' : ''
+
+  const params = `${frames}-${slice}-${resolution}${loop}`
   const file_name = `scanimation-${params}-grid${svg_format ? '-cutouts' : ''}`
 
   if (png_format) {
@@ -937,6 +978,39 @@ download_grid_cutouts_button.addEventListener('click', () =>
   download_grid('svg'),
 )
 controls_panel.append(download_grid_cutouts_button)
+
+// create a settings file & download it
+const download_settings = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const date = `${pad_start0(day)}.${pad_start0(month)}.${year}`
+
+  // create the text with all the custom settings from the inputs
+  let text = `Scanimation generated on ${date}\n\n`
+  const inputs_css_query = `input:not([type='range']), select, .switch`
+  const inputs = document.querySelectorAll(inputs_css_query)
+  inputs.forEach((input) => {
+    const label = document.querySelector(`label[for='${input.id}']`)
+    text += `${label.textContent}: ${input.value}\n`
+  })
+  text += '\nHope you enjoy it hihi!\n\n© Marie Malarme 2022'
+  const data = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`
+
+  const link = document.createElement('a')
+  link.setAttribute('href', data)
+  link.setAttribute('download', 'scanimation-settings.txt')
+  link.click()
+  link.remove()
+}
+
+const download_settings_button = document.createElement('button')
+download_settings_button.className = 'download'
+download_settings_button.disabled = true
+download_settings_button.textContent = 'Download settings'
+download_settings_button.addEventListener('click', download_settings)
+controls_panel.append(download_settings_button)
 
 const back_button = document.createElement('button')
 back_button.id = 'back-button'

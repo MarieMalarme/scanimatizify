@@ -178,9 +178,10 @@ label {
   font-size: 14px;
 }
 
-label span {
+div span {
   color: rgb(160, 160, 160);
   margin-left: 5px;
+  font-size: 14px;
 }
 
 #loop-control {
