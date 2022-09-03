@@ -77,6 +77,7 @@ const random_color = () => {
 // morph path customizable settings
 let blur_filter = 20
 let fill_color = 'black'
+let stroke_width = 10
 
 const draw_svg_path = (path_coords = '') => {
   // create the svg shape
@@ -98,7 +99,7 @@ const draw_svg_path = (path_coords = '') => {
   path.setAttribute('d', path_coords)
   path.setAttribute('fill', fill_color)
   path.setAttribute('stroke', 'white')
-  path.setAttribute('stroke-width', '70px')
+  path.setAttribute('stroke-width', `${stroke_width}px`)
   path.setAttribute('filter', 'url(#blur)')
   svg.append(path)
 
@@ -373,6 +374,23 @@ fill_input.addEventListener('input', (event) => {
 fill.append(fill_input)
 fill.append(fill_label)
 morph_path_settings.append(fill)
+
+// input to set the path stroke width
+const stroke = document.createElement('div')
+const stroke_label = document.createElement('label')
+stroke_label.textContent = 'Stroke width'
+const stroke_input = document.createElement('input')
+stroke_input.type = 'number'
+stroke_input.min = 0
+stroke_input.max = 50
+stroke_input.value = stroke_width
+stroke_input.addEventListener('input', (event) => {
+  stroke_width = Number(event.target.value)
+  morph_path.setAttribute('stroke-width', `${stroke_width}px`)
+})
+stroke.append(stroke_input)
+stroke.append(stroke_label)
+morph_path_settings.append(stroke)
 
 // input to set the blur effect
 const blur = document.createElement('div')
@@ -703,6 +721,7 @@ scanimate_button.addEventListener('click', async () => {
     // draw the frame step path on the frame svg
     frame_path.setAttribute('d', interpolator(morph_step))
     frame_path.setAttribute('fill', fill_color)
+    frame_path.setAttribute('stroke-width', `${stroke_width}px`)
     frame_blur.setAttribute('stdDeviation', blur_filter)
 
     // create a url for the svg
