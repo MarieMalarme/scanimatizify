@@ -79,6 +79,7 @@ let fill_color = 'black'
 let stroke_width = 40
 let stroke_color = 'lime'
 let blur_filter = 24
+let grid_color = 'black'
 
 const draw_svg_path = (path_coords = '') => {
   // create the svg shape
@@ -423,6 +424,20 @@ blur.append(blur_input)
 blur.append(blur_label)
 morph_path_settings.append(blur)
 
+// input to set the grid color
+const grid_fill = document.createElement('div')
+const grid_fill_label = document.createElement('label')
+grid_fill_label.textContent = 'Grid color'
+const grid_fill_input = document.createElement('input')
+grid_fill_input.type = 'text'
+grid_fill_input.value = grid_color
+grid_fill_input.addEventListener('input', (event) => {
+  grid_color = event.target.value
+})
+grid_fill.append(grid_fill_input)
+grid_fill.append(grid_fill_label)
+morph_path_settings.append(grid_fill)
+
 // panel for scanimation settings
 const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
@@ -657,14 +672,22 @@ scanimate_button.addEventListener('click', async () => {
   render_canvas.width = render_size
   render_canvas.height = render_size
 
+  // set frame path
+  frame_path.setAttribute('fill', fill_color)
+  frame_path.setAttribute('stroke', stroke_color)
+  frame_path.setAttribute('stroke-width', `${stroke_width}px`)
+  frame_blur.setAttribute('stdDeviation', blur_filter)
+
   // set grids size
   const grid_viewbox = `0 0 ${render_size} ${render_size}`
   grid_cutouts.setAttribute('viewBox', grid_viewbox)
   grid_cutouts.setAttribute('width', render_size)
   grid_cutouts.setAttribute('height', render_size)
+  grid_cutouts.setAttribute('fill', grid_color)
   grid_hiders.setAttribute('viewBox', grid_viewbox)
   grid_hiders.setAttribute('width', render_size)
   grid_hiders.setAttribute('height', render_size)
+  grid_hiders.setAttribute('fill', grid_color)
 
   // reset grid slider & position on new scanimation
   translate_grid = 0
@@ -734,10 +757,6 @@ scanimate_button.addEventListener('click', async () => {
 
     // draw the frame step path on the frame svg
     frame_path.setAttribute('d', interpolator(morph_step))
-    frame_path.setAttribute('fill', fill_color)
-    frame_path.setAttribute('stroke', stroke_color)
-    frame_path.setAttribute('stroke-width', `${stroke_width}px`)
-    frame_blur.setAttribute('stdDeviation', blur_filter)
 
     // create a url for the svg
     const { outerHTML: svg_html } = frame_svg
@@ -806,7 +825,6 @@ scanimate_button.addEventListener('click', async () => {
     cutout.setAttribute('y', cutout_y)
     cutout.setAttribute('width', cutout_width)
     cutout.setAttribute('height', cutout_height)
-    cutout.setAttribute('class', 'cutout')
     grid_cutouts.append(cutout)
   }
 
