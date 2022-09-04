@@ -273,3 +273,19 @@ input[type='range']::-webkit-slider-thumb {
   position: absolute;
   bottom: 55px;
 }
+
+#draw-playground:not(.hidden) {
+  z-index: 1;
+  position: absolute;
+  width: 80vw;
+  height: 40vw;
+  background: white;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+}
+
+.draw-path {
+  border: solid 1px black;
+  height: 100%;
+  width: 50%;
+}

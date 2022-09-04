@@ -168,6 +168,47 @@ video_button.addEventListener('click', () => {
   video_button.textContent = paused ? 'Play animation' : 'Pause animation'
 })
 
+let is_draw_playground_open = false
+
+// drawing playground
+const draw_playground = document.createElement('div')
+draw_playground.id = 'draw-playground'
+draw_playground.classList.add('hidden')
+
+const draw_start_path = document.createElement('div')
+draw_start_path.className = 'draw-path'
+draw_playground.append(draw_start_path)
+
+const draw_end_path = document.createElement('div')
+draw_end_path.className = 'draw-path'
+draw_playground.append(draw_end_path)
+
+body.append(draw_playground)
+
+// drawing playground button
+const draw_button = document.createElement('button')
+draw_button.id = 'drawing-button'
+draw_button.textContent = 'Draw paths'
+
+buttons.append(draw_button)
+body.append(buttons)
+
+draw_button.addEventListener('click', () => {
+  paused = true
+  draw_playground.classList.remove('hidden')
+  is_draw_playground_open = true
+})
+
+// detect click outside drawing playground to close it
+body.addEventListener('click', (event) => {
+  if (!is_draw_playground_open) return
+  const clicked_outside = !draw_playground.contains(event.target)
+  if (clicked_outside && event.target !== draw_button) {
+    draw_playground.classList.add('hidden')
+    is_draw_playground_open = false
+  }
+})
+
 // button to hide the grids
 const hide_grid_button = document.createElement('button')
 hide_grid_button.id = 'hide-grid-button'
