@@ -289,3 +289,8 @@ input[type='range']::-webkit-slider-thumb {
   height: 100%;
   width: 50%;
 }
+
+.draw-path svg {
+  width: 100%;
+  height: 100%;
+}

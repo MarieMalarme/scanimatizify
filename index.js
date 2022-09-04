@@ -174,16 +174,37 @@ let is_draw_playground_open = false
 const draw_playground = document.createElement('div')
 draw_playground.id = 'draw-playground'
 draw_playground.classList.add('hidden')
+body.append(draw_playground)
+
+// canvases to draw start & end paths
+const draw_svg_viewbox = `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`
+let is_mouse_down = false
 
 const draw_start_path = document.createElement('div')
 draw_start_path.className = 'draw-path'
 draw_playground.append(draw_start_path)
+const draw_start_path_svg = document.createElementNS(w3_url, 'svg')
+draw_start_path_svg.setAttribute('viewBox', draw_svg_viewbox)
+draw_start_path.append(draw_start_path_svg)
+draw_start_path.addEventListener('mousedown', () => {
+  is_mouse_down = true
+})
+draw_start_path.addEventListener('mouseup', () => {
+  is_mouse_down = false
+})
 
 const draw_end_path = document.createElement('div')
 draw_end_path.className = 'draw-path'
 draw_playground.append(draw_end_path)
-
-body.append(draw_playground)
+const draw_end_path_svg = document.createElementNS(w3_url, 'svg')
+draw_end_path_svg.setAttribute('viewBox', draw_svg_viewbox)
+draw_end_path.append(draw_end_path_svg)
+draw_end_path.addEventListener('mousedown', () => {
+  is_mouse_down = true
+})
+draw_end_path.addEventListener('mouseup', () => {
+  is_mouse_down = false
+})
 
 // drawing playground button
 const draw_button = document.createElement('button')
@@ -206,6 +227,7 @@ body.addEventListener('click', (event) => {
   if (clicked_outside && event.target !== draw_button) {
     draw_playground.classList.add('hidden')
     is_draw_playground_open = false
+    is_mouse_down = false
   }
 })
 
