@@ -77,6 +77,15 @@ const get_today_date = () => {
   return date
 }
 
+const get_viewbox_coords = (event, wrapper) => {
+  const { left, top, width, height } = wrapper.getBoundingClientRect()
+  const width_ratio = shape_viewbox_size / width
+  const height_ratio = shape_viewbox_size / height
+  const x = (event.clientX - left) * width_ratio
+  const y = (event.clientY - top) * height_ratio
+  return { x: x.toFixed(0), y: y.toFixed(0) }
+}
+
 let scanimation_id
 
 // morph path customizable settings
@@ -168,45 +177,60 @@ video_button.addEventListener('click', () => {
   video_button.textContent = paused ? 'Play animation' : 'Pause animation'
 })
 
-let is_draw_playground_open = false
-
-// drawing playground
-const draw_playground = document.createElement('div')
-draw_playground.id = 'draw-playground'
-draw_playground.classList.add('hidden')
-body.append(draw_playground)
+// drawing playgrounds
+const draw_playgrounds = document.createElement('div')
+draw_playgrounds.id = 'draw-playgrounds'
+draw_playgrounds.classList.add('hidden')
+body.append(draw_playgrounds)
 
 // canvases to draw start & end paths
 const draw_svg_viewbox = `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`
-let is_mouse_down = false
+let drawn_paths = { start: '', end: '' }
 
-const draw_start_path = document.createElement('div')
-draw_start_path.className = 'draw-path'
-draw_playground.append(draw_start_path)
-const draw_start_path_svg = document.createElementNS(w3_url, 'svg')
-draw_start_path_svg.setAttribute('viewBox', draw_svg_viewbox)
-draw_start_path.append(draw_start_path_svg)
-draw_start_path.addEventListener('mousedown', () => {
-  is_mouse_down = true
-})
-draw_start_path.addEventListener('mouseup', () => {
-  is_mouse_down = false
+Object.keys(morph_paths).forEach((path) => {
+  const draw_playground = document.createElement('div')
+  draw_playground.className = 'draw-path'
+  draw_playgrounds.append(draw_playground)
+
+  const draw_playground_svg = document.createElementNS(w3_url, 'svg')
+  draw_playground_svg.setAttribute('viewBox', draw_svg_viewbox)
+  draw_playground.append(draw_playground_svg)
+
+  const draw_playground_path = document.createElementNS(w3_url, 'path')
+  draw_playground_path.setAttribute('fill', 'none')
+  draw_playground_path.setAttribute('stroke', 'black')
+  draw_playground_path.setAttribute('stroke-width', '5px')
+  draw_playground_svg.append(draw_playground_path)
+
+  let is_mouse_down = false
+
+  // init the drawing on mouse down
+  draw_playground.addEventListener('mousedown', () => {
+    const { x, y } = get_viewbox_coords(event, draw_playground)
+    drawn_paths[path] = `M ${x} ${y}` // reset the path: previous drawing will be deleted
+    is_mouse_down = true
+  })
+
+  // continue drawing the path on mouse move with mouse down
+  draw_playground.addEventListener('mousemove', (event) => {
+    if (!is_mouse_down) return
+    const { x, y } = get_viewbox_coords(event, draw_playground)
+    drawn_paths[path] += `L ${x} ${y} `
+    draw_playground_path.setAttribute('d', drawn_paths[path])
+  })
+
+  // close the path on mouse up to finish the drawing
+  draw_playground.addEventListener('mouseup', (event) => {
+    const { x, y } = get_viewbox_coords(event, draw_playground)
+    drawn_paths[path] += ' Z'
+    draw_playground_path.setAttribute('d', drawn_paths[path])
+    is_mouse_down = false
+  })
 })
 
-const draw_end_path = document.createElement('div')
-draw_end_path.className = 'draw-path'
-draw_playground.append(draw_end_path)
-const draw_end_path_svg = document.createElementNS(w3_url, 'svg')
-draw_end_path_svg.setAttribute('viewBox', draw_svg_viewbox)
-draw_end_path.append(draw_end_path_svg)
-draw_end_path.addEventListener('mousedown', () => {
-  is_mouse_down = true
-})
-draw_end_path.addEventListener('mouseup', () => {
-  is_mouse_down = false
-})
+let is_draw_playgrounds_open = false
 
-// drawing playground button
+// drawing playgrounds button
 const draw_button = document.createElement('button')
 draw_button.id = 'drawing-button'
 draw_button.textContent = 'Draw paths'
@@ -216,17 +240,17 @@ body.append(buttons)
 
 draw_button.addEventListener('click', () => {
   paused = true
-  draw_playground.classList.remove('hidden')
-  is_draw_playground_open = true
+  draw_playgrounds.classList.remove('hidden')
+  is_draw_playgrounds_open = true
 })
 
-// detect click outside drawing playground to close it
+// detect click outside drawing playgrounds to close it
 body.addEventListener('click', (event) => {
-  if (!is_draw_playground_open) return
-  const clicked_outside = !draw_playground.contains(event.target)
+  if (!is_draw_playgrounds_open) return
+  const clicked_outside = !draw_playgrounds.contains(event.target)
   if (clicked_outside && event.target !== draw_button) {
-    draw_playground.classList.add('hidden')
-    is_draw_playground_open = false
+    draw_playgrounds.classList.add('hidden')
+    is_draw_playgrounds_open = false
     is_mouse_down = false
   }
 })
@@ -811,7 +835,7 @@ scanimate_button.addEventListener('click', async () => {
   // disable download button while waiting for scanimation to complete
   disable_download(true)
 
-  // hide the animation playground
+  // hide the animation playgrounds
   morph_shape.classList.add('hidden')
   video_button.classList.add('hidden')
   shape_selectors.classList.add('hidden')
@@ -978,7 +1002,7 @@ back_button.addEventListener('click', () => {
   grid_slider.classList.add('hidden')
   grid_label.classList.add('hidden')
 
-  // show the animation playground
+  // show the animation playgrounds
   morph_shape.classList.remove('hidden')
   video_button.classList.remove('hidden')
   shape_selectors.classList.remove('hidden')
