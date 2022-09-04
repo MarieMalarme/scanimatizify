@@ -61,29 +61,21 @@ let morph_paths = { start: default_paths.start, end: default_paths.end }
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 const round = (number) => Math.round((number + Number.EPSILON) * 100) / 100
 const pad_start0 = (string) => string.toString().padStart(2, '0')
-
-const random_int = (min, max) => {
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-const random_color = () => {
-  const hue = random_int(0, 360)
-  const saturation = random_int(50, 90)
-  const luminosity = random_int(40, 80)
-  return `hsl(${hue}, ${saturation}%, ${luminosity}%)`
-}
-
-// disable download buttons
-const disable_download = (disabled) => {
-  download_render_button.disabled = disabled
-  download_grid_hiders_button.disabled = disabled
-  download_grid_cutouts_button.disabled = disabled
-  download_settings_button.disabled = disabled
-}
-
 const generate_id = () => Math.random().toString(16).slice(10)
+
+// disable download button
+const disable_download = (disabled) => {
+  download_zip_button.disabled = disabled
+}
+
+const get_today_date = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const date = `${pad_start0(day)}.${pad_start0(month)}.${year}`
+  return date
+}
 
 let scanimation_id
 
@@ -710,6 +702,8 @@ const scanimate_button = document.createElement('button')
 scanimate_button.id = 'scanimate-button'
 scanimate_button.textContent = 'Scanimate!'
 scanimate_button.addEventListener('click', async () => {
+  // scanimation is starting
+
   // set scanimation id for downloads
   scanimation_id = generate_id()
 
@@ -751,7 +745,7 @@ scanimate_button.addEventListener('click', async () => {
   grid_slider.max = slice_size * 10
   grids.style.transform = `translate(0px)`
 
-  // disable download buttons
+  // disable download button while waiting for scanimation to complete
   disable_download(true)
 
   // hide the animation playground
@@ -880,6 +874,8 @@ scanimate_button.addEventListener('click', async () => {
     grid_cutouts.append(cutout)
   }
 
+  // scanimation is complete
+
   // remove the loader & enable pointer events
   loader.classList.add('hidden')
   body.style.pointerEvents = 'all'
@@ -897,129 +893,11 @@ scanimate_button.addEventListener('click', async () => {
   set_grid_mode_button.classList.remove('hidden')
   set_grid_mode_button.textContent = 'See cutouts'
 
-  // enable download buttons
+  // enable download button
   disable_download(false)
 })
 
 scanimation_settings.append(scanimate_button)
-
-// export render in png
-const download_render = () => {
-  const link = document.createElement('a')
-  const file_name = `scanimation-${scanimation_id}-render`
-  const image = render_canvas
-    .toDataURL('image/png')
-    .replace('image/png', 'image/octet-stream')
-  link.href = image
-  link.download = `${file_name}.png`
-  link.click()
-  link.remove()
-}
-
-const download_render_button = document.createElement('button')
-download_render_button.className = 'download'
-download_render_button.disabled = true
-download_render_button.textContent = 'Download render'
-download_render_button.addEventListener('click', download_render)
-controls_panel.append(download_render_button)
-
-// export grid in svg or png
-const download_grid = (format = 'png') => {
-  const svg_format = format === 'svg'
-  const png_format = format === 'png'
-
-  const svg = svg_format ? grid_cutouts : grid_hiders
-  const cloned_svg = svg.cloneNode(true)
-  cloned_svg.removeAttribute('style')
-  cloned_svg.removeAttribute('width')
-  cloned_svg.removeAttribute('height')
-
-  const { outerHTML: svg_html } = cloned_svg
-  const blob = new Blob([svg_html], { type: 'image/svg+xml;charset=utf-8' })
-  const URL = window.URL || window.webkitURL || window
-  const blobURL = URL.createObjectURL(blob)
-
-  const link = document.createElement('a')
-
-  const file_name_suffix = `${svg_format ? '-cutouts' : ''}`
-  const file_name = `scanimation-${scanimation_id}-grid${file_name_suffix}`
-
-  if (png_format) {
-    const image = new Image()
-    image.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = render_size
-      canvas.height = render_size
-      const context = canvas.getContext('2d')
-      context.drawImage(image, 0, 0, render_size, render_size)
-
-      const png = canvas.toDataURL('image/png')
-      link.href = png
-      link.download = `${file_name}.png`
-      link.click()
-      link.remove()
-    }
-    image.src = blobURL
-  }
-
-  if (svg_format) {
-    link.href = blobURL
-    link.download = `${file_name}.svg`
-    link.click()
-    link.remove()
-  }
-}
-
-const download_grid_hiders_button = document.createElement('button')
-download_grid_hiders_button.className = 'download'
-download_grid_hiders_button.disabled = true
-download_grid_hiders_button.textContent = 'Download grid in PNG'
-download_grid_hiders_button.addEventListener('click', () =>
-  download_grid('png'),
-)
-controls_panel.append(download_grid_hiders_button)
-
-const download_grid_cutouts_button = document.createElement('button')
-download_grid_cutouts_button.className = 'download'
-download_grid_cutouts_button.disabled = true
-download_grid_cutouts_button.textContent = 'Download grid cutouts in SVG'
-download_grid_cutouts_button.addEventListener('click', () =>
-  download_grid('svg'),
-)
-controls_panel.append(download_grid_cutouts_button)
-
-// create a settings file & download it
-const download_settings = () => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-  const day = now.getDate()
-  const date = `${pad_start0(day)}.${pad_start0(month)}.${year}`
-
-  // create the text with all the custom settings from the inputs
-  let text = `Scanimation #${scanimation_id} generated on ${date}\n\n`
-  const inputs_css_query = `input:not([type='range']), select, .switch`
-  const inputs = document.querySelectorAll(inputs_css_query)
-  inputs.forEach((input) => {
-    const label = document.querySelector(`label[for='${input.id}']`)
-    text += `${label.textContent}: ${input.value}\n`
-  })
-  text += '\nHope you enjoy it hihi!\n\n© Marie Malarme 2022'
-  const data = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`
-
-  const link = document.createElement('a')
-  link.setAttribute('href', data)
-  link.setAttribute('download', `scanimation-${scanimation_id}-settings.txt`)
-  link.click()
-  link.remove()
-}
-
-const download_settings_button = document.createElement('button')
-download_settings_button.className = 'download'
-download_settings_button.disabled = true
-download_settings_button.textContent = 'Download settings'
-download_settings_button.addEventListener('click', download_settings)
-controls_panel.append(download_settings_button)
 
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
@@ -1042,3 +920,94 @@ back_button.addEventListener('click', () => {
   video_button.classList.remove('hidden')
   shape_selectors.classList.remove('hidden')
 })
+
+// download files
+const svg_to_blob = (svg) => {
+  const cloned_svg = svg.cloneNode(true)
+  cloned_svg.removeAttribute('style')
+  cloned_svg.removeAttribute('width')
+  cloned_svg.removeAttribute('height')
+  const { outerHTML: svg_html } = cloned_svg
+  const blob = new Blob([svg_html], { type: 'image/svg+xml;charset=utf-8' })
+  return blob
+}
+
+const generate_file = {
+  // export render canvas as blob to convert to png file
+  render: () => new Promise((resolve) => render_canvas.toBlob(resolve)),
+
+  // convert svg grid to canvas & export canvas as blob to convert to png file
+  grid: () =>
+    new Promise((resolve) => {
+      const blob = svg_to_blob(grid_hiders)
+      const URL = window.URL || window.webkitURL || window
+      const blobURL = URL.createObjectURL(blob)
+      const image = new Image()
+      image.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = render_size
+        canvas.height = render_size
+        const context = canvas.getContext('2d')
+        context.drawImage(image, 0, 0, render_size, render_size)
+        return canvas.toBlob(resolve)
+      }
+      image.src = blobURL
+    }),
+
+  // export cutouts svg grid as blob to get svg file
+  cutouts: () => svg_to_blob(grid_cutouts),
+
+  // create text string with all the custom settings from inputs to get txt file
+  settings: () => {
+    const date = get_today_date()
+    let text = `Scanimation #${scanimation_id} generated on ${date}\n\n`
+    const inputs_css_query = `input:not([type='range']), select, .switch`
+    const inputs = document.querySelectorAll(inputs_css_query)
+    inputs.forEach((input) => {
+      const label = document.querySelector(`label[for='${input.id}']`)
+      text += `${label.textContent}: ${input.value}\n`
+    })
+    text += '\nHope you enjoy it hihi!\n\n© Marie Malarme 2022'
+    return text
+  },
+}
+
+// create a bundle zip file with jszip lib & download it
+const download_zip = async () => {
+  // create zip & folder
+  const zip = new JSZip()
+  const folder_name = `scanimation-${scanimation_id}`
+  const folder = zip.folder(folder_name)
+
+  // create & add all files to folder
+  const render = await generate_file.render()
+  folder.file(`${folder_name}-render.png`, render)
+
+  const grid = await generate_file.grid()
+  folder.file(`${folder_name}-grid.png`, grid)
+
+  const cutouts = generate_file.cutouts()
+  folder.file(`${folder_name}-grid-cutouts.svg`, cutouts)
+
+  const settings = generate_file.settings()
+  folder.file(`${folder_name}-settings.txt`, settings)
+
+  // zip the whole bundle & export as blob
+  const content = await zip.generateAsync({ type: 'blob' })
+  const URL = window.URL || window.webkitURL || window
+  const blob = URL.createObjectURL(content)
+
+  // download the bundle
+  const link = document.createElement('a')
+  link.href = blob
+  link.download = `scanimation-${scanimation_id}.zip`
+  link.click()
+  link.remove()
+}
+
+const download_zip_button = document.createElement('button')
+download_zip_button.className = 'download'
+download_zip_button.disabled = true
+download_zip_button.textContent = 'Download ZIP file'
+download_zip_button.addEventListener('click', download_zip)
+controls_panel.append(download_zip_button)
