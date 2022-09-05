@@ -244,6 +244,7 @@ add_shape_button.addEventListener('click', () => {
   // hide draw playground
   is_draw_playground_open = false
   draw_playground.classList.add('hidden')
+  draw_button.classList.remove('hidden')
 })
 
 // button to open the drawing playground
@@ -254,6 +255,7 @@ draw_button.addEventListener('click', () => {
   paused = true
   draw_playground.classList.remove('hidden')
   is_draw_playground_open = true
+  draw_button.classList.add('hidden')
 })
 
 body.append(draw_button)
@@ -267,6 +269,7 @@ body.addEventListener('click', (event) => {
     draw_playground.classList.add('hidden')
     is_draw_playground_open = false
     is_mouse_down = false
+    draw_button.classList.remove('hidden')
   }
 })
 
