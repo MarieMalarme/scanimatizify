@@ -178,79 +178,94 @@ video_button.addEventListener('click', () => {
 })
 
 // drawing playgrounds
-const draw_playgrounds = document.createElement('div')
-draw_playgrounds.id = 'draw-playgrounds'
-draw_playgrounds.classList.add('hidden')
-body.append(draw_playgrounds)
+const draw_playground = document.createElement('div')
+draw_playground.id = 'draw-playground'
+draw_playground.classList.add('hidden')
+body.append(draw_playground)
 
 // canvases to draw start & end paths
 const draw_svg_viewbox = `0 0 ${shape_viewbox_size} ${shape_viewbox_size}`
-let drawn_paths = { start: '', end: '' }
 
-Object.keys(morph_paths).forEach((path) => {
-  const draw_playground = document.createElement('div')
-  draw_playground.className = 'draw-path'
-  draw_playgrounds.append(draw_playground)
+let is_draw_playground_open = false
+let is_mouse_down = false
+let drawn_path = ''
 
-  const draw_playground_svg = document.createElementNS(w3_url, 'svg')
-  draw_playground_svg.setAttribute('viewBox', draw_svg_viewbox)
-  draw_playground.append(draw_playground_svg)
+const draw_playground_svg = document.createElementNS(w3_url, 'svg')
+draw_playground_svg.setAttribute('viewBox', draw_svg_viewbox)
+draw_playground.append(draw_playground_svg)
 
-  const draw_playground_path = document.createElementNS(w3_url, 'path')
-  draw_playground_path.setAttribute('fill', 'none')
-  draw_playground_path.setAttribute('stroke', 'black')
-  draw_playground_path.setAttribute('stroke-width', '5px')
-  draw_playground_svg.append(draw_playground_path)
+const draw_playground_path = document.createElementNS(w3_url, 'path')
+draw_playground_path.setAttribute('fill', 'none')
+draw_playground_path.setAttribute('stroke', 'black')
+draw_playground_path.setAttribute('stroke-width', '5px')
+draw_playground_svg.append(draw_playground_path)
 
-  let is_mouse_down = false
-
-  // init the drawing on mouse down
-  draw_playground.addEventListener('mousedown', () => {
-    const { x, y } = get_viewbox_coords(event, draw_playground)
-    drawn_paths[path] = `M ${x} ${y}` // reset the path: previous drawing will be deleted
-    is_mouse_down = true
-  })
-
-  // continue drawing the path on mouse move with mouse down
-  draw_playground.addEventListener('mousemove', (event) => {
-    if (!is_mouse_down) return
-    const { x, y } = get_viewbox_coords(event, draw_playground)
-    drawn_paths[path] += `L ${x} ${y} `
-    draw_playground_path.setAttribute('d', drawn_paths[path])
-  })
-
-  // close the path on mouse up to finish the drawing
-  draw_playground.addEventListener('mouseup', (event) => {
-    const { x, y } = get_viewbox_coords(event, draw_playground)
-    drawn_paths[path] += ' Z'
-    draw_playground_path.setAttribute('d', drawn_paths[path])
-    is_mouse_down = false
-  })
+// init the drawing on mouse down
+draw_playground_svg.addEventListener('mousedown', () => {
+  const { x, y } = get_viewbox_coords(event, draw_playground)
+  drawn_path = `M ${x} ${y}` // reset the path: previous drawing will be deleted
+  is_mouse_down = true
 })
 
-let is_draw_playgrounds_open = false
+// continue drawing the path on mouse move with mouse down
+draw_playground_svg.addEventListener('mousemove', (event) => {
+  if (!is_mouse_down) return
+  const { x, y } = get_viewbox_coords(event, draw_playground)
+  drawn_path += `L ${x} ${y} `
+  draw_playground_path.setAttribute('d', drawn_path)
+})
 
-// drawing playgrounds button
+// close the path on mouse up to finish the drawing
+draw_playground_svg.addEventListener('mouseup', (event) => {
+  const { x, y } = get_viewbox_coords(event, draw_playground)
+  drawn_path += ' Z'
+  draw_playground_path.setAttribute('d', drawn_path)
+  is_mouse_down = false
+})
+
+const add_shape_button = document.createElement('button')
+add_shape_button.textContent = 'Add shape'
+draw_playground.append(add_shape_button)
+add_shape_button.addEventListener('click', () => {
+  // add the new shape as a shape path selector & select it
+  const [shape_path, shape_selector] = create_shape_selector(
+    drawn_path,
+    shapes_paths.length,
+  )
+  select_shape_path('start', shape_path)
+
+  // add it in the shapes' paths array
+  shapes_paths.push(drawn_path)
+
+  // reset drawn path
+  drawn_path = ''
+  draw_playground_path.setAttribute('d', drawn_path)
+
+  // hide draw playground
+  is_draw_playground_open = false
+  draw_playground.classList.add('hidden')
+})
+
+// button to open the drawing playground
 const draw_button = document.createElement('button')
 draw_button.id = 'drawing-button'
-draw_button.textContent = 'Draw paths'
-
-buttons.append(draw_button)
-body.append(buttons)
-
+draw_button.textContent = 'Draw a new shape'
 draw_button.addEventListener('click', () => {
   paused = true
-  draw_playgrounds.classList.remove('hidden')
-  is_draw_playgrounds_open = true
+  draw_playground.classList.remove('hidden')
+  is_draw_playground_open = true
 })
 
-// detect click outside drawing playgrounds to close it
+body.append(draw_button)
+body.append(buttons)
+
+// detect click outside drawing playground to close it
 body.addEventListener('click', (event) => {
-  if (!is_draw_playgrounds_open) return
-  const clicked_outside = !draw_playgrounds.contains(event.target)
+  if (!is_draw_playground_open) return
+  const clicked_outside = !draw_playground.contains(event.target)
   if (clicked_outside && event.target !== draw_button) {
-    draw_playgrounds.classList.add('hidden')
-    is_draw_playgrounds_open = false
+    draw_playground.classList.add('hidden')
+    is_draw_playground_open = false
     is_mouse_down = false
   }
 })
@@ -304,6 +319,7 @@ const path_selectors = Object.fromEntries(
       shape_selectors.classList.add('hoverable')
       paused = true
       video_button.disabled = true
+      draw_button.disabled = true
       document.querySelector(`.path-selector:not(#${id})`).disabled = true
       Object.values(selected_paths).map((p) => p.classList.add('not-hoverable'))
       selected_paths[selector].classList.add('selected')
@@ -313,7 +329,39 @@ const path_selectors = Object.fromEntries(
   }),
 )
 
-shapes_paths.forEach((shape_path, index) => {
+const select_shape_path = (selector, path) => {
+  const path_selector = path_selectors[selector]
+  path_selector.classList.remove('selected')
+  shape_selectors.classList.remove('hoverable')
+  Object.values(selected_paths).map((p) => p.classList.remove('not-hoverable'))
+  path.parentNode.parentNode.append(path_selector)
+
+  const other_selector = selectors.find((s) => s !== selector)
+  path_selectors[other_selector].disabled = false
+  selected_paths[other_selector].classList.remove('disabled')
+  selected_paths[selector].classList.remove('selected')
+  selected_paths[selector].setAttribute('fill', 'none')
+  path.setAttribute('fill', 'black')
+  path.classList.add('selected')
+  selected_paths[selector] = path
+  path_to_set = null
+
+  // set the morph path to the selected path
+  morph_paths[selector] = path.getAttribute('d')
+  morph_path.setAttribute('d', path.getAttribute('d'))
+
+  // update the morph path with the selected shape & the interpolator
+  interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
+
+  // reset morph animation to start & relaunch animation
+  morph_step = 0
+  paused = false
+  video_button.textContent = 'Pause animation'
+  video_button.disabled = false
+  draw_button.disabled = false
+}
+
+const create_shape_selector = (shape_path, index) => {
   const is_default_start_path = shape_path === default_paths.start
   const is_default_end_path = shape_path === default_paths.end
   const is_default_path = is_default_start_path || is_default_end_path
@@ -361,6 +409,7 @@ shapes_paths.forEach((shape_path, index) => {
       shape_selectors.classList.add('hoverable')
       paused = true
       video_button.disabled = true
+      draw_button.disabled = true
       document.querySelector(
         `.path-selector:not(#${path_selector.id})`,
       ).disabled = true
@@ -373,29 +422,7 @@ shapes_paths.forEach((shape_path, index) => {
       if (is_already_selected) return
 
       // update ui to unselect the previously selected path & select the clicked one
-      const path_selector = path_selectors[path_to_set]
-      path_selector.classList.remove('selected')
-      shape_selectors.classList.remove('hoverable')
-      Object.values(selected_paths).map((p) =>
-        p.classList.remove('not-hoverable'),
-      )
-      path_selectors[other_selector].disabled = false
-      selected_paths[other_selector].classList.remove('disabled')
-      selected_paths[path_to_set].classList.remove('selected')
-      selected_paths[path_to_set].setAttribute('fill', 'none')
-      path.setAttribute('fill', 'black')
-      path.classList.add('selected')
-      selected_paths[path_to_set] = path
-      path_to_set = null
-
-      // update the morph path with the selected shape & the interpolator
-      interpolator = flubber.interpolate(morph_paths.start, morph_paths.end)
-
-      // reset morph animation to start & relaunch animation
-      morph_step = 0
-      paused = false
-      video_button.textContent = 'Pause animation'
-      video_button.disabled = false
+      select_shape_path(path_to_set, path)
     }
   })
 
@@ -420,7 +447,11 @@ shapes_paths.forEach((shape_path, index) => {
   svg.append(path)
   shape_selector.append(svg)
   shape_selectors.append(shape_selector)
-})
+
+  return [path, shape_selector]
+}
+
+shapes_paths.forEach(create_shape_selector)
 
 body.append(shape_selectors)
 
@@ -428,7 +459,6 @@ body.append(shape_selectors)
 const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
 const animation_axes = ['Horizontal', 'Vertical']
 const resolutions = { 72: 0.352777778, 150: 0.169333333, 300: 0.084666667 } // conversion for 1 px in mm for each resolution
-// 1px = 0.352777778mm in 72 dpi / 1px = 0.169333333mm in 300 dpi / 1px = 0.084666667mm in 300 dpi
 
 // scanimation customizable settings
 let render_size = 500 // in pixels
@@ -838,6 +868,7 @@ scanimate_button.addEventListener('click', async () => {
   // hide the animation playgrounds
   morph_shape.classList.add('hidden')
   video_button.classList.add('hidden')
+  draw_button.classList.add('hidden')
   shape_selectors.classList.add('hidden')
 
   // hide scanimation render
@@ -989,6 +1020,7 @@ scanimation_settings.append(scanimate_button)
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
 back_button.textContent = 'Back to animation'
+back_button.classList.add('hidden')
 
 body.append(back_button)
 
@@ -1005,6 +1037,7 @@ back_button.addEventListener('click', () => {
   // show the animation playgrounds
   morph_shape.classList.remove('hidden')
   video_button.classList.remove('hidden')
+  draw_button.classList.remove('hidden')
   shape_selectors.classList.remove('hidden')
 })
 

@@ -274,14 +274,31 @@ input[type='range']::-webkit-slider-thumb {
   bottom: 55px;
 }
 
-#draw-playgrounds:not(.hidden) {
+#draw-playground:not(.hidden) {
   z-index: 1;
   position: absolute;
-  width: 80vw;
-  height: 40vw;
   background: white;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid black;
   display: flex;
+  justify-content: center;
+  max-height: 80vh;
+  width: 55vw;
+  max-width: 80vh;
+  min-width: 600px;
+}
+
+#drawing-button {
+  bottom: 120px;
+  position: absolute;
+  width: 150px;
+  padding: 7px;
+}
+
+#draw-playground button {
+  position: absolute;
+  bottom: 30px;
+  width: 130px;
+  padding: 7px;
 }
 
 .draw-path {
