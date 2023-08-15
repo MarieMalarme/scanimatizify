@@ -23,7 +23,7 @@ body {
   width: 55vw;
   max-width: 80vh;
   min-width: 600px;
-  padding: 80px;
+  padding: 40px 80px 100px 80px;
 }
 
 #buttons {
@@ -127,35 +127,37 @@ button.selected {
 
 #controls-panel {
   position: fixed;
-  top: 30px;
-  left: 30px;
+  top: 20px;
+  left: 20px;
   display: flex;
   flex-direction: column;
+  z-index: 10;
 }
 
 .settings-panel {
+  background: white;
   border: solid 1px black;
   border-radius: 15px;
-  padding: 25px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
-  width: 380px;
+  margin-bottom: 10px;
+  width: 295px;
 }
 
 .settings-panel div:not(:last-child) {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .settings-panel p {
-  margin-bottom: 25px;
+  margin-bottom: 15px;
   opacity: 0.45;
+  font-size: 15px;
 }
 
 button.download {
   padding: 15px;
   border-radius: 50px;
-  margin-top: 10px;
   transition: box-shadow 0.2s ease-in-out;
 }
 
@@ -169,24 +171,26 @@ select,
   margin-right: 10px;
   outline: none;
   padding: 5px 10px;
-  width: 100px;
+  width: 65px;
   border: solid 1px black;
   border-radius: 20px;
   height: 28px;
+  font-size: 13px;
 }
 
 select {
-  padding-left: 5px;
+  padding: 5px;
+  text-overflow: ellipsis;
 }
 
 label {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 div span {
   color: rgb(160, 160, 160);
   margin-left: 5px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 #loop-control {
@@ -212,7 +216,7 @@ div span {
 
 .switch.active .switch-dot {
   background: black;
-  left: 75px;
+  left: 40px;
 }
 
 .settings-panel div.switch {
@@ -220,8 +224,8 @@ div span {
 }
 
 #scanimate-button {
-  margin-top: 15px;
-  padding: 5px 10px;
+  margin-top: 10px;
+  padding: 10px;
   background: black;
   color: white;
 }

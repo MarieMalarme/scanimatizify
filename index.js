@@ -90,9 +90,9 @@ let scanimation_id
 
 // morph path customizable settings
 let fill_color = 'black'
-let stroke_width = 40
+let stroke_width = 0
 let stroke_color = 'lime'
-let blur_filter = 24
+let blur_filter = 0
 let grid_color = 'black'
 
 const draw_svg_path = (path_coords = '') => {
@@ -504,42 +504,42 @@ fill.append(fill_label)
 morph_path_settings.append(fill)
 
 // input to set the path stroke width
-const stroke_size = document.createElement('div')
-const stroke_size_label = document.createElement('label')
-stroke_size_label.htmlFor = 'stroke_width'
-stroke_size_label.textContent = 'Stroke width'
-const stroke_size_input = document.createElement('input')
-stroke_size_input.id = 'stroke_width'
-stroke_size_input.type = 'number'
-stroke_size_input.min = 0
-stroke_size_input.max = 50
-stroke_size_input.value = stroke_width
-stroke_size_input.addEventListener('input', (event) => {
-  disable_download(true)
-  stroke_width = Number(event.target.value)
-  morph_path.setAttribute('stroke-width', stroke_width)
-})
-stroke_size.append(stroke_size_input)
-stroke_size.append(stroke_size_label)
-morph_path_settings.append(stroke_size)
+// const stroke_size = document.createElement('div')
+// const stroke_size_label = document.createElement('label')
+// stroke_size_label.htmlFor = 'stroke_width'
+// stroke_size_label.textContent = 'Stroke width'
+// const stroke_size_input = document.createElement('input')
+// stroke_size_input.id = 'stroke_width'
+// stroke_size_input.type = 'number'
+// stroke_size_input.min = 0
+// stroke_size_input.max = 50
+// stroke_size_input.value = stroke_width
+// stroke_size_input.addEventListener('input', (event) => {
+//   disable_download(true)
+//   stroke_width = Number(event.target.value)
+//   morph_path.setAttribute('stroke-width', stroke_width)
+// })
+// stroke_size.append(stroke_size_input)
+// stroke_size.append(stroke_size_label)
+// morph_path_settings.append(stroke_size)
 
 // input to set the path stroke color
-const stroke = document.createElement('div')
-const stroke_label = document.createElement('label')
-stroke_label.htmlFor = 'stroke_color'
-stroke_label.textContent = 'Stroke color'
-const stroke_input = document.createElement('input')
-stroke_input.id = 'stroke_color'
-stroke_input.type = 'text'
-stroke_input.value = stroke_color
-stroke_input.addEventListener('input', (event) => {
-  disable_download(true)
-  stroke_color = event.target.value
-  morph_path.setAttribute('stroke', stroke_color)
-})
-stroke.append(stroke_input)
-stroke.append(stroke_label)
-morph_path_settings.append(stroke)
+// const stroke = document.createElement('div')
+// const stroke_label = document.createElement('label')
+// stroke_label.htmlFor = 'stroke_color'
+// stroke_label.textContent = 'Stroke color'
+// const stroke_input = document.createElement('input')
+// stroke_input.id = 'stroke_color'
+// stroke_input.type = 'text'
+// stroke_input.value = stroke_color
+// stroke_input.addEventListener('input', (event) => {
+//   disable_download(true)
+//   stroke_color = event.target.value
+//   morph_path.setAttribute('stroke', stroke_color)
+// })
+// stroke.append(stroke_input)
+// stroke.append(stroke_label)
+// morph_path_settings.append(stroke)
 
 // input to set the blur effect
 const blur = document.createElement('div')
@@ -562,21 +562,21 @@ blur.append(blur_label)
 morph_path_settings.append(blur)
 
 // input to set the grid color
-const grid_fill = document.createElement('div')
-const grid_fill_label = document.createElement('label')
-grid_fill_label.htmlFor = 'grid_color'
-grid_fill_label.textContent = 'Grid color'
-const grid_fill_input = document.createElement('input')
-grid_fill_input.id = 'grid_color'
-grid_fill_input.type = 'text'
-grid_fill_input.value = grid_color
-grid_fill_input.addEventListener('input', (event) => {
-  disable_download(true)
-  grid_color = event.target.value
-})
-grid_fill.append(grid_fill_input)
-grid_fill.append(grid_fill_label)
-morph_path_settings.append(grid_fill)
+// const grid_fill = document.createElement('div')
+// const grid_fill_label = document.createElement('label')
+// grid_fill_label.htmlFor = 'grid_color'
+// grid_fill_label.textContent = 'Grid color'
+// const grid_fill_input = document.createElement('input')
+// grid_fill_input.id = 'grid_color'
+// grid_fill_input.type = 'text'
+// grid_fill_input.value = grid_color
+// grid_fill_input.addEventListener('input', (event) => {
+//   disable_download(true)
+//   grid_color = event.target.value
+// })
+// grid_fill.append(grid_fill_input)
+// grid_fill.append(grid_fill_label)
+// morph_path_settings.append(grid_fill)
 
 // panel for scanimation settings
 const scanimation_settings = document.createElement('div')
@@ -699,23 +699,23 @@ slice.append(slice_mm_label)
 scanimation_settings.append(slice)
 
 // input to set smoothness of curves for morphing
-const smoothness = document.createElement('div')
-const smoothness_label = document.createElement('label')
-smoothness_label.htmlFor = 'curve_smoothness'
-smoothness_label.textContent = 'Curve smoothness'
-const smoothness_input = document.createElement('input')
-smoothness_input.id = 'curve_smoothness'
-smoothness_input.type = 'number'
-smoothness_input.min = 1
-smoothness_input.max = 10
-smoothness_input.value = curves_smoothness
-smoothness_input.addEventListener('input', (event) => {
-  disable_download(true)
-  curves_smoothness = Number(event.target.value)
-})
-smoothness.append(smoothness_input)
-smoothness.append(smoothness_label)
-scanimation_settings.append(smoothness)
+// const smoothness = document.createElement('div')
+// const smoothness_label = document.createElement('label')
+// smoothness_label.htmlFor = 'curve_smoothness'
+// smoothness_label.textContent = 'Curve smoothness'
+// const smoothness_input = document.createElement('input')
+// smoothness_input.id = 'curve_smoothness'
+// smoothness_input.type = 'number'
+// smoothness_input.min = 1
+// smoothness_input.max = 10
+// smoothness_input.value = curves_smoothness
+// smoothness_input.addEventListener('input', (event) => {
+//   disable_download(true)
+//   curves_smoothness = Number(event.target.value)
+// })
+// smoothness.append(smoothness_input)
+// smoothness.append(smoothness_label)
+// scanimation_settings.append(smoothness)
 
 // input to set direction of the animation
 const direction = document.createElement('div')
