@@ -44,11 +44,6 @@ button {
   margin: 0 10px;
 }
 
-.hidden,
-div.hidden {
-  display: none;
-}
-
 #back-button {
   padding: 7px 12px;
   top: 30px;
@@ -295,18 +290,50 @@ input[type='range']::-webkit-slider-thumb {
   min-width: 600px;
 }
 
-#drawing-button {
-  bottom: 120px;
+#new-shape-buttons {
+  bottom: 105px;
   position: absolute;
-  width: 150px;
-  padding: 7px;
+  display: flex;
+  align-items: center;
 }
 
-#draw-playground button {
+#import-button,
+#drawing-button {
+  width: 150px;
+  padding: 7px;
+  margin: 0 10px;
+  position: relative;
+}
+
+#import-button label {
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+#import-button input {
+  display: none;
+}
+
+#draw-playground #add-drawn-shape-button {
   position: absolute;
   bottom: 30px;
   width: 130px;
   padding: 7px;
+}
+
+#draw-playground #close-draw-playground-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  border: none;
+  font-size: 30px;
+  background: none;
+  mix-blend-mode: difference;
+  color: white;
 }
 
 .draw-path {
@@ -318,4 +345,10 @@ input[type='range']::-webkit-slider-thumb {
 .draw-path svg {
   width: 100%;
   height: 100%;
+}
+
+.hidden,
+div.hidden,
+#new-shape-buttons.hidden {
+  display: none;
 }

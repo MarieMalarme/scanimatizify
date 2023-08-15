@@ -177,7 +177,76 @@ video_button.addEventListener('click', () => {
   video_button.textContent = paused ? 'Play animation' : 'Pause animation'
 })
 
-// drawing playgrounds
+// buttons to add a new shape (draw or import)
+const new_shape_buttons = document.createElement('div')
+new_shape_buttons.id = 'new-shape-buttons'
+body.append(new_shape_buttons)
+
+let is_importing = false
+
+// button to import an svg in the drawing playground
+const import_button = document.createElement('button')
+import_button.id = 'import-button'
+import_button.textContent = 'Import an SVG shape'
+
+const import_label = document.createElement('label')
+import_label.htmlFor = 'upload'
+const import_input = document.createElement('input')
+import_input.id = 'upload'
+import_input.name = 'upload'
+import_input.type = 'file'
+import_input.addEventListener('change', (event) => {
+  is_importing = true
+  // get file and display it in the playground
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    paused = true
+    draw_playground.classList.remove('hidden')
+    is_draw_playground_open = true
+    new_shape_buttons.classList.add('hidden')
+    add_new_shape_button.disabled = false
+
+    const svg_data = event.target.result
+    const base64 = svg_data.replace('data:image/svg+xml;base64,', '')
+    const decoded = atob(base64)
+
+    const parser = new DOMParser()
+    const svg_element = parser.parseFromString(decoded, 'image/svg+xml')
+    const path_tag = svg_element.querySelector('path')
+
+    // set drawn path with uploaded svg path
+    drawn_path = path_tag.getAttribute('d')
+    draw_playground_path.setAttribute('d', drawn_path)
+    draw_playground_path.setAttribute('fill', 'black')
+  }
+  if (event.target.files[0]) {
+    reader.readAsDataURL(event.target.files[0])
+  }
+})
+
+import_button.append(import_label)
+import_button.append(import_input)
+new_shape_buttons.append(import_button)
+
+// button to open the drawing playground
+const draw_button = document.createElement('button')
+draw_button.id = 'drawing-button'
+draw_button.textContent = 'Draw a new shape'
+draw_button.addEventListener('click', () => {
+  // reset drawn path
+  drawn_path = ''
+  draw_playground_path.setAttribute('d', drawn_path)
+  draw_playground_path.setAttribute('fill', 'none')
+
+  paused = true
+  draw_playground.classList.remove('hidden')
+  is_draw_playground_open = true
+  new_shape_buttons.classList.add('hidden')
+})
+
+new_shape_buttons.append(draw_button)
+
+// drawing playground
 const draw_playground = document.createElement('div')
 draw_playground.id = 'draw-playground'
 draw_playground.classList.add('hidden')
@@ -195,13 +264,15 @@ draw_playground_svg.setAttribute('viewBox', draw_svg_viewbox)
 draw_playground.append(draw_playground_svg)
 
 const draw_playground_path = document.createElementNS(w3_url, 'path')
-draw_playground_path.setAttribute('fill', 'none')
-draw_playground_path.setAttribute('stroke', 'black')
-draw_playground_path.setAttribute('stroke-width', '5px')
 draw_playground_svg.append(draw_playground_path)
 
 // init the drawing on mouse down
 draw_playground_svg.addEventListener('mousedown', () => {
+  if (is_importing) return
+  draw_playground_path.setAttribute('fill', 'none')
+  draw_playground_path.setAttribute('stroke', 'black')
+  draw_playground_path.setAttribute('stroke-width', '5px')
+
   const { x, y } = get_viewbox_coords(event, draw_playground)
   drawn_path = `M ${x} ${y}` // reset the path: previous drawing will be deleted
   is_mouse_down = true
@@ -209,7 +280,8 @@ draw_playground_svg.addEventListener('mousedown', () => {
 
 // continue drawing the path on mouse move with mouse down
 draw_playground_svg.addEventListener('mousemove', (event) => {
-  if (!is_mouse_down) return
+  if (is_importing || !is_mouse_down) return
+  add_new_shape_button.disabled = false
   const { x, y } = get_viewbox_coords(event, draw_playground)
   drawn_path += `L ${x} ${y} `
   draw_playground_path.setAttribute('d', drawn_path)
@@ -217,16 +289,22 @@ draw_playground_svg.addEventListener('mousemove', (event) => {
 
 // close the path on mouse up to finish the drawing
 draw_playground_svg.addEventListener('mouseup', (event) => {
+  if (is_importing) return
   const { x, y } = get_viewbox_coords(event, draw_playground)
   drawn_path += ' Z'
   draw_playground_path.setAttribute('d', drawn_path)
+  draw_playground_path.setAttribute('fill', 'black')
+  draw_playground_path.removeAttribute('stroke')
+  draw_playground_path.removeAttribute('stroke-width')
   is_mouse_down = false
 })
 
-const add_shape_button = document.createElement('button')
-add_shape_button.textContent = 'Add shape'
-draw_playground.append(add_shape_button)
-add_shape_button.addEventListener('click', () => {
+const add_new_shape_button = document.createElement('button')
+add_new_shape_button.id = 'add-drawn-shape-button'
+add_new_shape_button.textContent = 'Add shape'
+add_new_shape_button.disabled = true
+draw_playground.append(add_new_shape_button)
+add_new_shape_button.addEventListener('click', () => {
   // add the new shape as a shape path selector & select it
   const [shape_path, shape_selector] = create_shape_selector(
     drawn_path,
@@ -243,35 +321,24 @@ add_shape_button.addEventListener('click', () => {
 
   // hide draw playground
   is_draw_playground_open = false
+  is_importing = false
+  add_new_shape_button.disabled = true
   draw_playground.classList.add('hidden')
-  draw_button.classList.remove('hidden')
+  new_shape_buttons.classList.remove('hidden')
 })
 
-// button to open the drawing playground
-const draw_button = document.createElement('button')
-draw_button.id = 'drawing-button'
-draw_button.textContent = 'Draw a new shape'
-draw_button.addEventListener('click', () => {
-  paused = true
-  draw_playground.classList.remove('hidden')
-  is_draw_playground_open = true
-  draw_button.classList.add('hidden')
+// button to close drawing playground
+const close_draw_playground_button = document.createElement('button')
+close_draw_playground_button.id = 'close-draw-playground-button'
+close_draw_playground_button.textContent = '×'
+close_draw_playground_button.addEventListener('click', () => {
+  is_importing = false
+  draw_playground.classList.add('hidden')
+  is_draw_playground_open = false
+  new_shape_buttons.classList.remove('hidden')
+  import_input.value = ''
 })
-
-body.append(draw_button)
-body.append(buttons)
-
-// detect click outside drawing playground to close it
-body.addEventListener('click', (event) => {
-  if (!is_draw_playground_open) return
-  const clicked_outside = !draw_playground.contains(event.target)
-  if (clicked_outside && event.target !== draw_button) {
-    draw_playground.classList.add('hidden')
-    is_draw_playground_open = false
-    is_mouse_down = false
-    draw_button.classList.remove('hidden')
-  }
-})
+draw_playground.append(close_draw_playground_button)
 
 // button to hide the grids
 const hide_grid_button = document.createElement('button')
@@ -323,6 +390,7 @@ const path_selectors = Object.fromEntries(
       paused = true
       video_button.disabled = true
       draw_button.disabled = true
+      import_button.disabled = true
       document.querySelector(`.path-selector:not(#${id})`).disabled = true
       Object.values(selected_paths).map((p) => p.classList.add('not-hoverable'))
       selected_paths[selector].classList.add('selected')
@@ -362,6 +430,7 @@ const select_shape_path = (selector, path) => {
   video_button.textContent = 'Pause animation'
   video_button.disabled = false
   draw_button.disabled = false
+  import_button.disabled = false
 }
 
 const create_shape_selector = (shape_path, index) => {
@@ -413,6 +482,8 @@ const create_shape_selector = (shape_path, index) => {
       paused = true
       video_button.disabled = true
       draw_button.disabled = true
+      import_button.disabled = true
+
       document.querySelector(
         `.path-selector:not(#${path_selector.id})`,
       ).disabled = true
@@ -871,7 +942,7 @@ scanimate_button.addEventListener('click', async () => {
   // hide the animation playgrounds
   morph_shape.classList.add('hidden')
   video_button.classList.add('hidden')
-  draw_button.classList.add('hidden')
+  new_shape_buttons.classList.add('hidden')
   shape_selectors.classList.add('hidden')
 
   // hide scanimation render
