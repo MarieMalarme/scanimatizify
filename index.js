@@ -195,6 +195,7 @@ const import_input = document.createElement('input')
 import_input.id = 'upload'
 import_input.name = 'upload'
 import_input.type = 'file'
+import_input.accept = '.svg'
 import_input.addEventListener('change', (event) => {
   is_importing = true
   // get file and display it in the playground
