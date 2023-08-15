@@ -520,6 +520,14 @@ const create_shape_selector = (shape_path, index) => {
 
   svg.append(path)
   shape_selector.append(svg)
+
+  // button to remove a shape from the panel
+  const delete_button = document.createElement('button')
+  delete_button.className = 'delete-button'
+  delete_button.textContent = 'Delete'
+  delete_button.addEventListener('click', () => shape_selector.remove())
+  shape_selector.append(delete_button)
+
   shape_selectors.append(shape_selector)
 
   return [path, shape_selector]

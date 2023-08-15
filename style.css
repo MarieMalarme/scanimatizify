@@ -74,6 +74,22 @@ button:disabled {
   align-items: center;
 }
 
+.delete-button {
+  display: none;
+}
+
+.shape-selectors:not(.hoverable)
+  .shape-selector:has(path:not(.selected)):hover
+  .delete-button {
+  display: block;
+  position: absolute;
+  transform: translateY(34px);
+  top: 0;
+  font-size: 10px;
+  padding-top: 4px;
+  border: none;
+}
+
 svg {
   overflow: visible;
 }
@@ -91,7 +107,7 @@ svg {
 
 .path-selector {
   position: absolute;
-  top: -30px;
+  top: -24px;
   padding: 3px 10px;
   font-size: 11px;
   color: rgb(140, 140, 140);
