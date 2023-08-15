@@ -1128,7 +1128,7 @@ back_button.addEventListener('click', () => {
   // toggle animation playgrounds
   morph_shape.classList.toggle('hidden')
   video_button.classList.toggle('hidden')
-  draw_button.classList.toggle('hidden')
+  new_shape_buttons.classList.toggle('hidden')
   shape_selectors.classList.toggle('hidden')
 })
 
