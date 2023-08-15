@@ -50,8 +50,7 @@ div.hidden {
 }
 
 #back-button {
-  width: 140px;
-  padding: 7px;
+  padding: 7px 12px;
   top: 30px;
   right: 40px;
   position: fixed;

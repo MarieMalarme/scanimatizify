@@ -1002,7 +1002,9 @@ scanimate_button.addEventListener('click', async () => {
   body.style.pointerEvents = 'all'
 
   // show the scanimation render
+  is_anim_playground_open = false
   back_button.classList.remove('hidden')
+  back_button.textContent = `Back to animation`
   render_canvas.classList.remove('hidden')
   grids.classList.remove('hidden')
   grid_hiders.classList.remove('hidden')
@@ -1020,6 +1022,9 @@ scanimate_button.addEventListener('click', async () => {
 
 scanimation_settings.append(scanimate_button)
 
+let has_scanimated = true
+let is_anim_playground_open = true
+
 const back_button = document.createElement('button')
 back_button.id = 'back-button'
 back_button.textContent = 'Back to animation'
@@ -1028,20 +1033,24 @@ back_button.classList.add('hidden')
 body.append(back_button)
 
 back_button.addEventListener('click', () => {
-  // hide scanimation render
-  back_button.classList.add('hidden')
-  render_canvas.classList.add('hidden')
-  grids.classList.add('hidden')
-  hide_grid_button.classList.add('hidden')
-  set_grid_mode_button.classList.add('hidden')
-  grid_slider.classList.add('hidden')
-  grid_label.classList.add('hidden')
+  is_anim_playground_open = !is_anim_playground_open
 
-  // show the animation playgrounds
-  morph_shape.classList.remove('hidden')
-  video_button.classList.remove('hidden')
-  draw_button.classList.remove('hidden')
-  shape_selectors.classList.remove('hidden')
+  // toggle scanimation render
+  back_button.textContent = `Back to ${
+    is_anim_playground_open ? 'scanimation' : 'animation'
+  }`
+  render_canvas.classList.toggle('hidden')
+  grids.classList.toggle('hidden')
+  hide_grid_button.classList.toggle('hidden')
+  set_grid_mode_button.classList.toggle('hidden')
+  grid_slider.classList.toggle('hidden')
+  grid_label.classList.toggle('hidden')
+
+  // toggle animation playgrounds
+  morph_shape.classList.toggle('hidden')
+  video_button.classList.toggle('hidden')
+  draw_button.classList.toggle('hidden')
+  shape_selectors.classList.toggle('hidden')
 })
 
 // download files
