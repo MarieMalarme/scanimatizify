@@ -2,6 +2,8 @@
 
 A little web-based tool to morph & animate 2 SVG shapes by interpolating the paths, & convert the output to 2 printable files to create a scanimation.
 
+Try it out live [here](https://scanimatizify.studiodev.xyz/)!
+
 ## What is a scanimation?
 
 You can find a brief explanation on [the Wikipedia page](https://en.wikipedia.org/wiki/Barrier-grid_animation_and_stereography).
