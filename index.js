@@ -320,9 +320,12 @@ add_new_shape_button.addEventListener('click', () => {
   drawn_path = ''
   draw_playground_path.setAttribute('d', drawn_path)
 
+  // reset imported file in the file reader
+  is_importing = false
+  import_input.value = ''
+
   // hide draw playground
   is_draw_playground_open = false
-  is_importing = false
   add_new_shape_button.disabled = true
   draw_playground.classList.add('hidden')
   new_shape_buttons.classList.remove('hidden')
@@ -333,11 +336,12 @@ const close_draw_playground_button = document.createElement('button')
 close_draw_playground_button.id = 'close-draw-playground-button'
 close_draw_playground_button.textContent = '×'
 close_draw_playground_button.addEventListener('click', () => {
+  // reset imported file in the file reader
+  import_input.value = ''
   is_importing = false
   draw_playground.classList.add('hidden')
   is_draw_playground_open = false
   new_shape_buttons.classList.remove('hidden')
-  import_input.value = ''
 })
 draw_playground.append(close_draw_playground_button)
 
