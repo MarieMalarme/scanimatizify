@@ -18,14 +18,6 @@ body {
   justify-content: center;
 }
 
-#shape {
-  max-height: 80vh;
-  width: 55vw;
-  max-width: 80vh;
-  min-width: 600px;
-  padding: 40px 80px 100px 80px;
-}
-
 #buttons {
   position: fixed;
   top: 30px;
@@ -44,95 +36,9 @@ button {
   margin: 0 10px;
 }
 
-#back-button {
-  padding: 7px 12px;
-  top: 30px;
-  right: 40px;
-  position: fixed;
-}
-
 button:disabled {
   color: lightgrey;
   border-color: lightgrey;
-}
-
-.shape-selectors {
-  position: fixed;
-  bottom: 30px;
-  display: flex;
-  justify-content: center;
-  width: 100vw;
-  padding: 0px 50px;
-}
-
-.shape-selector {
-  max-width: 40px;
-  max-height: 40px;
-  padding: 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.delete-button {
-  display: none;
-}
-
-.shape-selectors:not(.hoverable)
-  .shape-selector:has(path:not(.selected)):hover
-  .delete-button {
-  display: block;
-  position: absolute;
-  transform: translateY(34px);
-  top: 0;
-  font-size: 10px;
-  padding-top: 4px;
-  border: none;
-}
-
-svg {
-  overflow: visible;
-}
-
-.shape-selector svg path {
-  stroke: black;
-  stroke-width: 30px;
-}
-
-.shape-selectors.hoverable div svg:hover path:not(.not-hoverable) {
-  stroke: grey;
-  fill: grey;
-  cursor: pointer;
-}
-
-.path-selector {
-  position: absolute;
-  top: -24px;
-  padding: 3px 10px;
-  font-size: 11px;
-  color: rgb(140, 140, 140);
-  border-color: rgb(140, 140, 140);
-}
-
-button.selected {
-  color: white;
-  background: black;
-}
-
-.shape-selectors:not(.hoverable) .shape-selector:hover button {
-  color: black;
-  border-color: black;
-}
-
-.shape-selector svg path.not-hoverable {
-  fill: lightgrey;
-  stroke: lightgrey;
-}
-
-.shape-selector svg path.selected:not(.not-hoverable) {
-  fill: black;
-  stroke: black;
-  cursor: pointer;
 }
 
 #controls-panel {
@@ -238,6 +144,7 @@ div span {
   padding: 10px;
   background: black;
   color: white;
+  width: 100%;
 }
 
 .displayable-canvas {
@@ -293,78 +200,48 @@ input[type='range']::-webkit-slider-thumb {
   bottom: 55px;
 }
 
-#draw-playground:not(.hidden) {
-  z-index: 1;
-  position: absolute;
-  background: white;
-  border: 1px solid black;
-  display: flex;
-  justify-content: center;
-  max-height: 80vh;
-  width: 55vw;
-  max-width: 80vh;
-  min-width: 600px;
-}
-
-#new-shape-buttons {
-  bottom: 105px;
-  position: absolute;
+#upload-video-button {
+  margin: 20px 0px;
+  width: 100%;
+  padding: 7px;
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border: none;
 }
 
-#import-button,
-#drawing-button {
-  width: 150px;
-  padding: 7px;
-  margin: 0 10px;
-  position: relative;
-}
-
-#import-button label {
+#upload-video-button label {
   cursor: pointer;
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0;
-  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#import-button input {
+#upload-video-button label div {
+  border: solid 1px black;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(5px);
+  padding: 10px;
+  width: 100%;
+}
+
+#upload-video-button input {
   display: none;
 }
 
-#draw-playground #add-drawn-shape-button {
+#upload-video-button video {
+  z-index: 0;
   position: absolute;
-  bottom: 30px;
-  width: 130px;
-  padding: 7px;
-}
-
-#draw-playground #close-draw-playground-button {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  border: none;
-  font-size: 30px;
-  background: none;
-  mix-blend-mode: difference;
-  color: white;
-}
-
-.draw-path {
-  border: solid 1px black;
-  height: 100%;
-  width: 50%;
-}
-
-.draw-path svg {
-  width: 100%;
   height: 100%;
 }
 
 .hidden,
-div.hidden,
-#new-shape-buttons.hidden {
+div.hidden {
   display: none;
 }
