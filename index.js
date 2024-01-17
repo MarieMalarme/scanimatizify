@@ -222,7 +222,7 @@ scanimation_settings.style.display = 'none'
 const size = document.createElement('div')
 const size_label = document.createElement('label')
 size_label.htmlFor = 'render_size'
-size_label.textContent = 'Dimensions in px'
+size_label.textContent = 'Width in px'
 const size_mm_label = document.createElement('span')
 size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
 const size_input = document.createElement('input')
@@ -444,9 +444,9 @@ grids.addEventListener('mousewheel', (event) => {
 body.append(grid_slider)
 
 // set frame canvas to draw each svg frame with effect before slicing
-const frame_canvas = document.createElement('canvas')
-frame_canvas.className = 'frame-canvas'
-const frame_context = frame_canvas.getContext('2d', {
+const copy_frame_canvas = document.createElement('canvas')
+copy_frame_canvas.className = 'frame-canvas'
+const frame_context = copy_frame_canvas.getContext('2d', {
   willReadFrequently: true,
 })
 
@@ -501,7 +501,8 @@ scanimate_button.addEventListener('click', async () => {
   loader.classList.remove('hidden')
   body.style.pointerEvents = 'none'
 
-  // scanimation properties:
+  // scanimation properties
+
   // get the total frames amount; in case the loop is on, the amount is increased
   const final_frames_amount = Math.min(
     max_extracted_frames_amount,
@@ -510,9 +511,15 @@ scanimate_button.addEventListener('click', async () => {
   const loop_frames_amount = final_frames_amount + (final_frames_amount - 2)
   const frames_amount_sum = loop_on ? loop_frames_amount : final_frames_amount
 
-  // set size for the frame canvas to be drawn calibrated on the render size
-  frame_canvas.width = render_width
-  frame_canvas.height = render_height
+  // set size for the copy frame canvas to be drawn calibrated on the render size;
+  // make the image a bit smaller to add padding around to have some space to move the grid
+  const render_padding = render_size * render_padding_ratio
+
+  copy_frame_width = render_width - render_padding
+  copy_frame_height = render_height - render_padding
+
+  copy_frame_canvas.width = copy_frame_width
+  copy_frame_canvas.height = copy_frame_height
 
   // set render canvas size
   render_canvas.width = render_width
@@ -521,8 +528,8 @@ scanimate_button.addEventListener('click', async () => {
   const is_horizontal_axis = animation_axis === 'Horizontal'
 
   // set slice variables according to animation direction
-  const slice_height = is_horizontal_axis ? render_height : slice_size
-  const slice_width = is_horizontal_axis ? slice_size : render_width
+  const slice_height = is_horizontal_axis ? copy_frame_height : slice_size
+  const slice_width = is_horizontal_axis ? slice_size : copy_frame_width
 
   // slice the image in equal sections according to the settings
   const slices_amount =
@@ -539,7 +546,7 @@ scanimate_button.addEventListener('click', async () => {
     const image = extracted_frames[frame_index * frames_interval]
 
     // draw the image on the frame canvas
-    const draw_image_coords = [0, 0, render_width, render_height]
+    const draw_image_coords = [0, 0, copy_frame_width, copy_frame_height]
     frame_context.drawImage(image, ...draw_image_coords)
 
     // slice the image frame and draw the visible slices to the render:
@@ -551,7 +558,11 @@ scanimate_button.addEventListener('click', async () => {
       const copy_y = is_horizontal_axis ? 0 : slice * slice_size
       const copy_coords = [copy_x, copy_y, slice_width, slice_height]
       const copied_pixels = frame_context.getImageData(...copy_coords)
-      render_context.putImageData(copied_pixels, copy_x, copy_y)
+
+      // set coords to paste the slice to the render canvas
+      const paste_padding = render_padding / 2
+      const paste_coords = [copy_x + paste_padding, copy_y + paste_padding] // add padding around the image
+      render_context.putImageData(copied_pixels, ...paste_coords)
     }
 
     // clear the frame canvas before drawing the next frame
