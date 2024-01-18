@@ -99,27 +99,34 @@ video.append(video_source)
 
 let is_uploading_video = false
 let extracted_frames = []
-let max_extracted_frames_amount
 const read_frames_interval = 0.034 // the interval between 2 frames when read with the MediaStreamTrackProcessor API
 
+// calculate the maximum amount of selectable frames according to video duration & frames interval
+const get_selectable_frames_amount = (interval) => {
+  const extracted_video_frames_amount = video.duration / read_frames_interval
+  const selectable_frames_amount =
+    Math.floor(extracted_video_frames_amount / interval) + 1 // add 1 because the first frame will be taken at time 0
+  return selectable_frames_amount
+}
+
+// set frames amount value and input
 const set_frames_amount = () => {
-  const single_video_frames_amount = video.duration / read_frames_interval
-  max_extracted_frames_amount =
-    Math.floor(single_video_frames_amount / frames_interval) + 1 // add 1 cause the first frame will be taken at time 0
+  const selectable_frames_amount = get_selectable_frames_amount(frames_interval)
 
   // init the frames amount value to 4 frames, or to the max extracted frames if it is less than 4
   if (!frames_amount) {
-    frames_amount = Math.min(max_extracted_frames_amount, 4)
+    frames_amount = Math.min(selectable_frames_amount, 4)
   }
 
-  // if the current frames amount is higher than the max extracted frames, set it the the max extracted frames
-  if (frames_amount > max_extracted_frames_amount) {
-    frames_amount = max_extracted_frames_amount
+  // if the current frames amount is higher than the max extracted frames, set it to the max extracted frames
+  if (frames_amount > selectable_frames_amount) {
+    frames_amount = selectable_frames_amount
   }
 
   // set the input value and the input max value
   frames_input.value = frames_amount
-  frames_input.max = max_extracted_frames_amount
+  frames_input.max = selectable_frames_amount
+  frames_input.disabled = selectable_frames_amount === 2
   frames_label.textContent = `Frames amount: ${frames_amount}`
 }
 
@@ -314,17 +321,29 @@ scanimation_settings.append(resolution)
 const interval = document.createElement('div')
 const interval_label = document.createElement('label')
 interval_label.htmlFor = 'frames_interval'
-interval_label.textContent = 'Frames to extract interval'
+interval_label.textContent = 'Selected frames interval'
 const interval_input = document.createElement('input')
 interval_input.id = 'frames_interval'
 interval_input.type = 'number'
 interval_input.min = 1
-interval_input.max = 100
 interval_input.value = frames_interval
-interval_input.addEventListener('input', (event) => {
+interval_input.addEventListener('input', ({ target }) => {
   disable_download(true)
-  frames_interval = Number(event.target.value)
+
+  // check if selectable frames amount is less than 2
+  const selectable_frames_amount = get_selectable_frames_amount(target.value)
+  // if so, do not update values
+  if (selectable_frames_amount < 2) {
+    interval_input.value = frames_interval
+    return
+  }
+
+  frames_interval = Number(target.value)
   set_frames_amount()
+})
+// disable typing directly in the input field, only increasing or decreasing with arrows
+interval_input.addEventListener('keydown', ({ key }) => {
+  key !== 'ArrowUp' && key !== 'ArrowDown' && event.preventDefault()
 })
 interval.append(interval_input)
 interval.append(interval_label)
