@@ -116,6 +116,7 @@ const set_frames_amount = () => {
   // set the input value and the input max value
   frames_input.value = frames_amount
   frames_input.max = max_extracted_frames_amount
+  frames_label.textContent = `Frames amount: ${frames_amount}`
 }
 
 // button to upload_video a video
@@ -297,15 +298,14 @@ frames_label.htmlFor = 'frames_amount'
 frames_label.textContent = 'Frames amount'
 const frames_input = document.createElement('input')
 frames_input.id = 'frames_amount'
-frames_input.type = 'number'
-frames_input.min = 3
-frames_input.max = 20
+frames_input.type = 'range'
+frames_input.min = 2
 frames_input.value = frames_amount
 frames_input.addEventListener('input', (event) => {
   disable_download(true)
   const value = Number(event.target.value)
-  if (value > max_extracted_frames_amount) return
   frames_amount = value
+  frames_label.textContent = `Frames amount: ${value}`
 })
 frames.append(frames_input)
 frames.append(frames_label)
@@ -506,12 +506,8 @@ scanimate_button.addEventListener('click', async () => {
   // scanimation properties
 
   // get the total frames amount; in case the loop is on, the amount is increased
-  const final_frames_amount = Math.min(
-    max_extracted_frames_amount,
-    frames_amount,
-  ) // limit the frames amount to the maximum frames that can be extracted from the video
-  const loop_frames_amount = final_frames_amount + (final_frames_amount - 2)
-  const frames_amount_sum = loop_on ? loop_frames_amount : final_frames_amount
+  const loop_frames_amount = frames_amount + (frames_amount - 2)
+  const frames_amount_sum = loop_on ? loop_frames_amount : frames_amount
 
   // set size for the copy frame canvas to be drawn calibrated on the render size;
   // make the image a bit smaller to add padding around to have some space to move the grid
@@ -538,8 +534,8 @@ scanimate_button.addEventListener('click', async () => {
   // draw on the canvas for each frame to then slice the image
   for (let frame = 0; frame < frames_amount_sum; frame++) {
     // if the loop is on, past the last animation frame, the frames go reverse
-    const has_reached_animation_end = frame > final_frames_amount - 1
-    const reversed_frame = frame - (frame - (final_frames_amount - 1)) * 2
+    const has_reached_animation_end = frame > frames_amount - 1
+    const reversed_frame = frame - (frame - (frames_amount - 1)) * 2
     const frame_index = has_reached_animation_end ? reversed_frame : frame
 
     // get the matching image from the extracted frames array using the interval value
