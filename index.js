@@ -160,13 +160,19 @@ upload_video_input.addEventListener('change', async (event) => {
     // reset the extracted frames array
     extracted_frames = []
 
-    // update the UI
+    // update the UI:
+    // disable download button
+    disable_download(true)
+    // hide scanimation render
+    render_canvas.classList.add('hidden')
+    grids.classList.add('hidden')
+    grid_slider.classList.add('hidden')
+    grid_label.classList.add('hidden')
+    hide_grid_button.classList.add('hidden')
+    set_grid_mode_button.classList.add('hidden')
+    // hide settings
     download_zip_button.style.display = 'none'
     scanimation_settings.style.display = 'none'
-    upload_video_button.style.height = '150px'
-    upload_video_input.disabled = true
-    upload_video_label.style.cursor = 'default'
-    upload_video_label_text.textContent = 'Reading video to extract frames...'
 
     // get the video src from the input, load it & play it
     let is_video_playing = false
@@ -195,6 +201,11 @@ upload_video_input.addEventListener('change', async (event) => {
       video.currentTime = 0
       track.stop()
     }
+
+    // update UI to turn the upload button into a loader & give feedback
+    upload_video_input.disabled = true
+    upload_video_label.style.cursor = 'default'
+    upload_video_label_text.textContent = 'Reading video to extract frames...'
 
     // read each frame and save it as an image
     let frame_index = 0
