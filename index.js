@@ -60,7 +60,7 @@ set_grid_mode_button.addEventListener('click', () => {
 })
 
 // scanimation fixed settings
-const render_padding_ratio = 0.15 // padding around the render image to have space to move the grid
+const render_padding = 50 // padding around the render image to have space to move the grid
 const animation_axes = ['Horizontal', 'Vertical']
 const resolutions = { 72: 0.352777778, 150: 0.169333333, 300: 0.084666667 } // conversion for 1 px in mm for each resolution
 
@@ -450,7 +450,6 @@ const frame_context = copy_frame_canvas.getContext('2d', {
   willReadFrequently: true,
 })
 
-let render_padding
 let render_width
 let render_height
 
@@ -513,8 +512,6 @@ scanimate_button.addEventListener('click', async () => {
 
   // set size for the copy frame canvas to be drawn calibrated on the render size;
   // make the image a bit smaller to add padding around to have some space to move the grid
-  const render_padding = render_size * render_padding_ratio
-
   copy_frame_width = render_width - render_padding
   copy_frame_height = render_height - render_padding
 
