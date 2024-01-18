@@ -65,7 +65,8 @@ const animation_axes = ['Horizontal', 'Vertical']
 const resolutions = { 72: 0.352777778, 150: 0.169333333, 300: 0.084666667 } // conversion for 1 px in mm for each resolution
 
 // scanimation customizable settings
-let render_size = 500 // in pixels
+let render_width = 500 // in pixels
+let render_height // will be set by calculating the image ratio
 let px_to_mm = resolutions['150'] // resolution of 150 dpi by default
 let frames_interval = 50
 let frames_amount
@@ -195,12 +196,11 @@ upload_video_input.addEventListener('change', async (event) => {
     upload_video_label.style.cursor = 'pointer'
     upload_video_input.disabled = false
 
-    // set render sizes
+    // set render height
     const { width, height } = extracted_frames[0]
     // calculate frame ratio according to the image orientation — vertical or horizontal
     const frame_ratio = height > width ? height / width : width / height
-    render_width = render_size
-    render_height = render_size * frame_ratio
+    render_height = render_width * frame_ratio
   }
 })
 
@@ -221,20 +221,26 @@ scanimation_settings.style.display = 'none'
 // input to set the size of the render
 const size = document.createElement('div')
 const size_label = document.createElement('label')
-size_label.htmlFor = 'render_size'
+size_label.htmlFor = 'render_width'
 size_label.textContent = 'Width in px'
 const size_mm_label = document.createElement('span')
-size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
+size_mm_label.textContent = `~ ${(render_width * px_to_mm).toFixed(2)} mm`
 const size_input = document.createElement('input')
-size_input.id = 'render_size'
+size_input.id = 'render_width'
 size_input.type = 'number'
 size_input.min = 200
 size_input.max = 2000
-size_input.value = render_size
+size_input.value = render_width
 size_input.addEventListener('input', (event) => {
   disable_download(true)
-  render_size = Number(event.target.value)
-  size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
+  render_width = Number(event.target.value)
+  size_mm_label.textContent = `~ ${(render_width * px_to_mm).toFixed(2)} mm`
+
+  // set render height
+  const { width, height } = extracted_frames[0]
+  // calculate frame ratio according to the image orientation — vertical or horizontal
+  const frame_ratio = height > width ? height / width : width / height
+  render_height = render_width * frame_ratio
 })
 size.append(size_input)
 size.append(size_label)
@@ -258,7 +264,7 @@ resolution_input.addEventListener('input', (event) => {
   disable_download(true)
   px_to_mm = resolutions[event.target.value]
   slice_mm_label.textContent = `~ ${(slice_size * px_to_mm).toFixed(2)} mm`
-  size_mm_label.textContent = `~ ${(render_size * px_to_mm).toFixed(2)} mm`
+  size_mm_label.textContent = `~ ${(render_width * px_to_mm).toFixed(2)} mm`
 })
 resolution.append(resolution_input)
 resolution.append(resolution_label)
@@ -449,9 +455,6 @@ copy_frame_canvas.className = 'frame-canvas'
 const frame_context = copy_frame_canvas.getContext('2d', {
   willReadFrequently: true,
 })
-
-let render_width
-let render_height
 
 // button to generate the scanimation grid & sliced image
 const scanimate_button = document.createElement('button')
