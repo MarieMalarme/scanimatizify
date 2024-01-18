@@ -92,6 +92,10 @@ controls_panel.append(video_upload)
 const video = document.createElement('video')
 video.crossOrigin = 'anonymous'
 video.muted = true
+// video source element
+const video_source = document.createElement('source')
+video_source.type = 'video/mp4' // this flag enables to read .mov videos
+video.append(video_source)
 
 let is_uploading_video = false
 let extracted_frames = []
@@ -135,13 +139,24 @@ upload_video_input.name = 'upload'
 upload_video_input.type = 'file'
 upload_video_input.accept = 'video/*'
 
+const handle_video_error = (error, action) => {
+  console.log(`An error occured when ${action}ing the video!`)
+  console.log(error)
+  upload_video_label_text.textContent = `Video can't be ${action}ed! Try again.`
+  setTimeout(
+    () => (upload_video_label_text.textContent = `Upload a video`),
+    2500,
+  )
+}
+
 upload_video_input.addEventListener('change', async (event) => {
   is_uploading_video = true
 
   // get video from input: read, display it in the panel & extract frames
-  const reader = new FileReader()
-  if (event.target.files[0]) reader.readAsDataURL(event.target.files[0])
-  reader.onload = async (event) => {
+  const file_reader = new FileReader()
+  if (event.target.files[0]) file_reader.readAsDataURL(event.target.files[0])
+  file_reader.onerror = (error) => handle_video_error(error, 'load')
+  file_reader.onload = async (event) => {
     // reset the extracted frames array
     extracted_frames = []
 
@@ -153,25 +168,41 @@ upload_video_input.addEventListener('change', async (event) => {
     upload_video_label.style.cursor = 'default'
     upload_video_label_text.textContent = 'Reading video to extract frames...'
 
-    // get the video src from the input & play it
-    video.src = event.target.result
-    await video.play()
+    // get the video src from the input, load it & play it
+    let is_video_playing = false
+    video_source.src = event.target.result
+    video.load() // this has to be called so the video load the new source content
+    await video
+      .play()
+      .then(() => (is_video_playing = true))
+      .catch((error) => handle_video_error(error, 'play'))
+
+    // if an error occured and the video could not be played, do not progress further
+    if (!is_video_playing) return
+
+    // if the API is not supported by the user's browser, do not progress further
+    if (!window.MediaStreamTrackProcessor) {
+      console.error(`Your browser doesn't support this API yet!`)
+      return
+    }
 
     // read the video track & extract the frames
-    if (window.MediaStreamTrackProcessor) {
-      const [track] = video.captureStream().getVideoTracks()
-      video.onended = () => {
-        video.pause()
-        video.currentTime = 0
-        track.stop()
-      }
-      const processor = new MediaStreamTrackProcessor(track)
-      const reader = processor.readable.getReader()
+    const [track] = video.captureStream().getVideoTracks()
+    const processor = new MediaStreamTrackProcessor(track)
+    const media_reader = processor.readable.getReader()
+    video.onended = () => {
+      video.pause()
+      video.currentTime = 0
+      track.stop()
+    }
 
-      // read each frame and save it as an image
-      let frame_index = 0
-      const read_video_chunk = () => {
-        reader.read().then(async ({ done, value }) => {
+    // read each frame and save it as an image
+    let frame_index = 0
+    const read_video_chunk = () => {
+      media_reader
+        .read()
+        .catch((error) => handle_video_error(error, 'extract'))
+        .then(async ({ done, value }) => {
           if (!value) return
           const bitmap = await createImageBitmap(value)
           extracted_frames.push(bitmap)
@@ -179,12 +210,9 @@ upload_video_input.addEventListener('change', async (event) => {
           value.close()
           if (!done) read_video_chunk()
         })
-      }
-
-      read_video_chunk()
-    } else {
-      console.error("your browser doesn't support this API yet")
     }
+
+    read_video_chunk()
 
     // wait for the video to play completely
     await sleep(video.duration * 1000)
