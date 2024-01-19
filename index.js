@@ -138,7 +138,7 @@ upload_video_button.append(video)
 const upload_video_label = document.createElement('label')
 const upload_video_label_text = document.createElement('div')
 upload_video_label.append(upload_video_label_text)
-upload_video_label_text.textContent = 'Upload a video'
+upload_video_label_text.textContent = 'Upload your video!'
 upload_video_label.htmlFor = 'upload'
 const upload_video_input = document.createElement('input')
 upload_video_input.id = 'upload'
@@ -151,7 +151,7 @@ const handle_video_error = (error, action) => {
   console.log(error)
   upload_video_label_text.textContent = `Video can't be ${action}ed! Try again.`
   setTimeout(
-    () => (upload_video_label_text.textContent = `Upload a video`),
+    () => (upload_video_label_text.textContent = `Upload your video!`),
     2500,
   )
 }
@@ -239,7 +239,7 @@ upload_video_input.addEventListener('change', async (event) => {
     set_frames_amount()
     scanimation_settings.style.display = 'block'
     download_zip_button.style.display = 'block'
-    upload_video_label_text.textContent = 'Upload a new video'
+    upload_video_label_text.textContent = 'Upload a new video!'
     upload_video_label.style.cursor = 'pointer'
     upload_video_input.disabled = false
 
