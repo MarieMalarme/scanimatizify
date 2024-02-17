@@ -9,13 +9,39 @@
 <body>
 
   <header>
-    <a href="/" id="title">Scanimatizify</a> is a web-based tool to create & download printable scanimation material from an uploaded video.
+    <div>
+      <a href="/" id="title">Scanimatizify</a> is a web-based tool to create & download printable scanimation material from an uploaded video.
+    </div>
+
+    <button id="tour-button" style="margin-top: 20px;">Want a guided tour?</button>
+    <div id="modal" class="">
+      <button id="close-modal-button">
+        <svg width="16px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+          <g fill="none" stroke="black" stroke-width="75">
+            <line x1="55" y1="55" x2="945" y2="945" />
+            <line x1="945" y1="55" x2="55" y2="945" />
+          </g>
+        </svg>
+      </button>
+      <div>1. Be sure to check what a scanimation is <a href="https://en.wikipedia.org/wiki/Barrier-grid_animation_and_stereography" target="_blank">here</a>.</div>
+      <div>2. Upload a video of your choice — not a too long one; a few seconds is enough.</div>
+      <div>3. Choose your scanimation settings.</div>
+      <div>4. Scanimate!</div>
+      <div>5. Admire the result and try it out moving the grid both ways!</div>
+      <div>6. Download & extract the ZIP file.</div>
+      <div>7. Print your scanimated image on paper.</div>
+      <div>8. Either print the grid on a transparent film, or cut out the cutouts grid.</div>
+      <div>9. Have fun IRL!</div>
+    </div>
   </header>
+
+  <script src="jszip.min.js"></script>
+  <script type="text/javascript" src="index.js"></script>
 
   <footer id="credits">
     <a
       id="repository-link"
-      href="https://github.com/MarieMalarme/greetizify"
+      href="https://github.com/MarieMalarme/scanimatizify"
       target="_blank"
     >
       <svg width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
@@ -36,9 +62,6 @@
       <div>2023</div>
     </div>
   </footer>
-
-  <script src="jszip.min.js"></script>
-  <script type="text/javascript" src="index.js"></script>
 
 </body>
 </html>

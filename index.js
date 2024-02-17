@@ -29,7 +29,7 @@ let grid_color = 'black'
 // set up the html elements
 
 const buttons = document.createElement('div')
-buttons.id = 'buttons'
+buttons.id = 'grid-buttons'
 body.append(buttons)
 
 // button to hide the grids
@@ -42,7 +42,6 @@ buttons.append(hide_grid_button)
 hide_grid_button.addEventListener('click', () => {
   const is_grid_hidden = grids.classList.toggle('hidden')
   grid_slider.classList.toggle('hidden')
-  grid_label.classList.toggle('hidden')
   hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
 })
 
@@ -78,6 +77,35 @@ let animation_axis = animation_axes[0]
 const controls_panel = document.createElement('div')
 controls_panel.id = 'controls-panel'
 body.append(controls_panel)
+
+const close_controls_button = document.createElement('button')
+close_controls_button.id = 'close-controls-button'
+close_controls_button.textContent = 'Close settings'
+controls_panel.append(close_controls_button)
+close_controls_button.addEventListener('click', () => {
+  const settings_panels = [
+    ...document.querySelectorAll(
+      '#controls-panel *:not(button#close-controls-button)',
+    ),
+  ]
+
+  const are_settings_hidden = settings_panels[0].classList.contains('hidden')
+
+  video_upload.classList.toggle('hidden')
+  close_controls_button.textContent = `${
+    are_settings_hidden ? 'Close' : 'Open'
+  } settings`
+
+  controls_panel.style.height = `${are_settings_hidden ? '100vh' : 'auto'}`
+
+  if (extracted_frames.length) {
+    scanimation_settings.classList.toggle('hidden')
+
+    if (download_zip_button.disabled) {
+      download_zip_button.classList.toggle('hidden')
+    }
+  }
+})
 
 // panel for video upload
 const video_upload = document.createElement('div')
@@ -174,12 +202,11 @@ upload_video_input.addEventListener('change', async (event) => {
     render_canvas.classList.add('hidden')
     grids.classList.add('hidden')
     grid_slider.classList.add('hidden')
-    grid_label.classList.add('hidden')
     hide_grid_button.classList.add('hidden')
     set_grid_mode_button.classList.add('hidden')
     // hide settings
-    download_zip_button.style.display = 'none'
-    scanimation_settings.style.display = 'none'
+    download_zip_button.classList.add('hidden')
+    scanimation_settings.classList.add('hidden')
 
     // get the video src from the input, load it & play it
     let is_video_playing = false
@@ -237,8 +264,8 @@ upload_video_input.addEventListener('change', async (event) => {
 
     // update the UI once frames are loaded
     set_frames_amount()
-    scanimation_settings.style.display = 'block'
-    download_zip_button.style.display = 'block'
+    scanimation_settings.classList.remove('hidden')
+    download_zip_button.classList.remove('hidden')
     upload_video_label_text.textContent = 'Upload a new video!'
     upload_video_label.style.cursor = 'pointer'
     upload_video_input.disabled = false
@@ -258,12 +285,11 @@ video_upload.append(upload_video_button)
 // panel for scanimation settings
 const scanimation_settings = document.createElement('div')
 scanimation_settings.id = 'scanimation-settings'
-scanimation_settings.className = 'settings-panel'
+scanimation_settings.className = 'settings-panel hidden'
 scanimation_settings_label = document.createElement('p')
 scanimation_settings_label.textContent = 'Scanimation settings'
 scanimation_settings.append(scanimation_settings_label)
 controls_panel.append(scanimation_settings)
-scanimation_settings.style.display = 'none'
 
 // input to set the size of the render
 const size = document.createElement('div')
@@ -472,25 +498,29 @@ body.append(grids)
 
 // create a grid slider to move the grid on top of the scanimation image
 // and have an overview of the animation
-const grid_slider = document.createElement('input')
+const grid_slider = document.createElement('div')
 grid_slider.id = 'grid-slider'
 grid_slider.classList.add('hidden')
-grid_slider.type = 'range'
-grid_slider.min = -(slice_size * 10)
-grid_slider.max = slice_size * 10
-grid_slider.value = 0
-grid_slider.step = slice_size / 10
+body.append(grid_slider)
 
 const grid_label = document.createElement('label')
 grid_label.id = 'grid-label'
-grid_label.classList.add('hidden')
 grid_label.textContent = `Slide here or scroll on the grid to move it & see the animation!`
-body.append(grid_label)
+grid_slider.append(grid_label)
+
+const grid_slider_input = document.createElement('input')
+grid_slider_input.id = 'grid-slider-input'
+grid_slider_input.type = 'range'
+grid_slider_input.min = -(slice_size * 10)
+grid_slider_input.max = slice_size * 10
+grid_slider_input.value = 0
+grid_slider_input.step = slice_size / 10
+grid_slider.append(grid_slider_input)
 
 let translate_grid = 0
 
 // move the grid with the slider
-grid_slider.addEventListener('input', (event) => {
+grid_slider_input.addEventListener('input', (event) => {
   translate_grid = Number(event.target.value)
   const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
   grids.style.transform = `translate${axis}(${translate_grid}px)`
@@ -498,14 +528,13 @@ grid_slider.addEventListener('input', (event) => {
 
 // move the grid on scroll
 grids.addEventListener('mousewheel', (event) => {
-  const step = Number(grid_slider.step)
+  const step = Number(grid_slider_input.step)
   const inc = event.deltaY < 0 ? -step : step
   translate_grid += inc
   const axis = animation_axis === 'Horizontal' ? 'X' : 'Y'
   grids.style.transform = `translate${axis}(${translate_grid}px)`
-  grid_slider.value = translate_grid
+  grid_slider_input.value = translate_grid
 })
-body.append(grid_slider)
 
 // set frame canvas to draw each svg frame with effect before slicing
 const copy_frame_canvas = document.createElement('canvas')
@@ -542,10 +571,10 @@ scanimate_button.addEventListener('click', async () => {
 
   // reset grid slider & position on new scanimation
   translate_grid = 0
-  grid_slider.value = 0
-  grid_slider.step = slice_size / 10
-  grid_slider.min = -(slice_size * 10)
-  grid_slider.max = slice_size * 10
+  grid_slider_input.value = 0
+  grid_slider_input.step = slice_size / 10
+  grid_slider_input.min = -(slice_size * 10)
+  grid_slider_input.max = slice_size * 10
   grids.style.transform = `translate(0px)`
 
   // disable download button while waiting for scanimation to complete
@@ -553,7 +582,6 @@ scanimate_button.addEventListener('click', async () => {
 
   // hide scanimation render
   grid_slider.classList.add('hidden')
-  grid_label.classList.add('hidden')
   hide_grid_button.classList.add('hidden')
   set_grid_mode_button.classList.add('hidden')
 
@@ -665,11 +693,18 @@ scanimate_button.addEventListener('click', async () => {
   grid_hiders.classList.remove('hidden')
   grid_cutouts.classList.add('hidden')
   grid_slider.classList.remove('hidden')
-  grid_label.classList.remove('hidden')
   hide_grid_button.classList.remove('hidden')
   hide_grid_button.textContent = 'Hide grid'
   set_grid_mode_button.classList.remove('hidden')
   set_grid_mode_button.textContent = 'See cutouts'
+
+  // hide settings panels on mobile
+  if (window.matchMedia('(max-width: 850px)').matches) {
+    video_upload.classList.add('hidden')
+    scanimation_settings.classList.add('hidden')
+    close_controls_button.textContent = 'Open settings'
+    controls_panel.style.height = 'auto'
+  }
 
   // enable download button
   disable_download(false)
@@ -767,6 +802,18 @@ const download_zip_button = document.createElement('button')
 download_zip_button.className = 'download'
 download_zip_button.disabled = true
 download_zip_button.textContent = 'Download ZIP file'
-download_zip_button.style.display = 'none'
+download_zip_button.classList.add('hidden')
 download_zip_button.addEventListener('click', download_zip)
 controls_panel.append(download_zip_button)
+
+// UI guided tour modal
+const modal = document.querySelector('#modal')
+modal.classList.add('hidden')
+const tour_button = document.querySelector('#tour-button')
+tour_button.addEventListener('click', () => {
+  modal.classList.toggle('hidden')
+})
+const close_modal_button = document.querySelector('#close-modal-button')
+close_modal_button.addEventListener('click', () =>
+  modal.classList.add('hidden'),
+)

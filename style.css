@@ -16,9 +16,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-#buttons {
+#grid-buttons {
   position: fixed;
   top: 30px;
 }
@@ -30,7 +31,7 @@ button {
   cursor: pointer;
 }
 
-#buttons button {
+#grid-buttons button {
   width: 130px;
   padding: 7px;
   margin: 0 10px;
@@ -48,6 +49,11 @@ button:disabled {
   display: flex;
   flex-direction: column;
   z-index: 10;
+}
+
+button#close-controls-button {
+  padding: 5px 15px;
+  margin-bottom: 10px;
 }
 
 .settings-panel {
@@ -75,10 +81,15 @@ button.download {
   padding: 15px;
   border-radius: 50px;
   transition: box-shadow 0.2s ease-in-out;
+  background: black;
+  color: white;
+  min-width: 295px;
 }
 
 button.download:disabled {
   cursor: default;
+  background: none;
+  color: lightgrey;
 }
 
 input,
@@ -155,7 +166,7 @@ div span {
 .displayable-canvas,
 #grids,
 .grid {
-  max-width: 70vh;
+  max-width: 70vw;
   max-height: 70vh;
 }
 
@@ -166,12 +177,6 @@ div span {
 
 #grids {
   position: absolute;
-}
-
-#grid-slider {
-  position: fixed;
-  bottom: 55px;
-  width: 50vw;
 }
 
 div:has(> input) {
@@ -218,7 +223,17 @@ label[for='frames_amount'] {
   margin-left: 7px;
 }
 
-input[type='range']#grid-slider {
+#grid-slider:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  bottom: 55px;
+  width: 50vw;
+}
+
+input[type='range']#grid-slider-input {
+  width: 100%;
   height: 38px;
   border-radius: 30px;
   padding: 7px;
@@ -226,14 +241,14 @@ input[type='range']#grid-slider {
   border: solid 1px black;
 }
 
-input[type='range']#grid-slider::-webkit-slider-thumb {
+input[type='range']#grid-slider-input::-webkit-slider-thumb {
   width: 26px;
   height: 26px;
 }
 
 #grid-label {
-  position: absolute;
-  bottom: 30px;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 #upload-video-button {
@@ -288,11 +303,42 @@ header {
   line-height: 25px;
   text-align: right;
   width: 25vw;
-  font-size: 22px;
+  font-size: 20px;
   position: absolute;
   top: 15px;
   right: 10px;
   padding: 15px 20px;
+}
+
+button#tour-button {
+  font-size: 20px;
+  padding: 5px 15px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  position: relative;
+}
+
+button#close-modal-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border: none;
+  background: none;
+}
+
+#modal {
+  line-height: 30px;
+  text-align: left;
+  border: solid 1px black;
+  padding: 20px 25px;
+  position: absolute;
+  width: 30vw;
+  margin-top: 10px;
+  right: 25px;
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* CREDITS FOOTER */
@@ -306,6 +352,7 @@ footer#credits {
   right: 10px;
   padding: 15px 20px;
   font-size: 18px;
+  z-index: 20;
 }
 
 a {
@@ -343,4 +390,65 @@ a#portfolio-link:hover {
 
 a#repository-link:hover svg g {
   stroke: blue;
+}
+
+@media all and (max-width: 1000px) {
+  header {
+    width: 30vw;
+  }
+
+  #modal {
+    width: 50vw;
+  }
+}
+
+@media all and (min-width: 1000px) and (max-width: 1200px) {
+  header {
+    width: 35vw;
+  }
+
+  #modal {
+    width: 50vw;
+  }
+}
+
+@media all and (max-width: 850px) {
+  header {
+    display: none;
+  }
+
+  #modal {
+    display: none;
+  }
+
+  #controls-panel {
+    width: 100vw;
+    padding: 20px;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(20px);
+  }
+
+  .settings-panel {
+    width: 100%;
+  }
+
+  .displayable-canvas,
+  #grids,
+  .grid {
+    margin-bottom: 30px;
+  }
+
+  #grid-slider:not(.hidden) {
+    bottom: 160px;
+    width: 90vw;
+  }
+
+  #grid-buttons {
+    top: 135px;
+  }
+
+  button.download:disabled {
+    display: none;
+  }
 }
