@@ -1,0 +1,50 @@
+header {
+  font-size: 30px;
+  text-align: center;
+  width: 100%;
+  border-bottom: solid 2px black;
+  display: flex;
+}
+
+header div {
+  padding: 20px 25px;
+}
+
+header div:nth-child(1) {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header div:nth-child(2) {
+  border-left: solid 2px black;
+}
+
+header div span {
+  color: black;
+  border-bottom: solid 2px black;
+  margin: 0;
+}
+
+header a {
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+  border: none;
+}
+
+/* mobile  */
+@media all and (max-width: 850px) {
+  header {
+    font-size: 15px;
+  }
+
+  header div span {
+    border-width: 1px;
+  }
+
+  header div {
+    padding: 10px 15px;
+  }
+}

@@ -3,452 +3,199 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'sans';
+  font-size: 30px;
+  grid-column: span 2;
 }
 
 @font-face {
   font-family: 'sans';
-  src: url('./px.ttf');
+  src: url('./assets/px.ttf');
 }
 
 body {
   width: 100vw;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-#grid-buttons {
-  position: fixed;
-  top: 30px;
-}
-
-button {
-  background: white;
-  border-radius: 20px;
-  border: solid 1px black;
-  cursor: pointer;
-}
-
-#grid-buttons button {
-  width: 130px;
-  padding: 7px;
-  margin: 0 10px;
-}
-
-button:disabled {
-  color: lightgrey;
-  border-color: lightgrey;
-}
-
-#controls-panel {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  flex-direction: column;
-  z-index: 10;
-}
-
-button#close-controls-button {
-  padding: 5px 15px;
-  margin-bottom: 10px;
-}
-
-.settings-panel {
-  background: white;
-  border: solid 1px black;
-  border-radius: 15px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
-  width: 295px;
-}
-
-.settings-panel div:not(:last-child) {
-  margin-bottom: 5px;
-}
-
-.settings-panel p {
-  margin-bottom: 15px;
-  opacity: 0.45;
-  font-size: 15px;
-}
-
-button.download {
-  padding: 15px;
-  border-radius: 50px;
-  transition: box-shadow 0.2s ease-in-out;
-  background: black;
-  color: white;
-  min-width: 295px;
-}
-
-button.download:disabled {
-  cursor: default;
-  background: none;
-  color: lightgrey;
-}
-
-input,
-select,
-.switch {
-  margin-right: 10px;
-  outline: none;
-  padding: 5px 10px;
-  width: 65px;
-  border: solid 1px black;
-  border-radius: 20px;
-  height: 28px;
-  font-size: 13px;
-}
-
-select {
-  padding: 5px;
-  text-overflow: ellipsis;
-}
-
-label {
-  font-size: 13px;
-}
-
-div span {
-  color: rgb(160, 160, 160);
-  margin-left: 5px;
-  font-size: 13px;
-}
-
-#loop-control {
-  display: flex;
-  align-items: center;
-}
-
-.switch {
-  position: relative;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.switch-dot {
-  left: 5px;
-  width: 18px;
-  height: 18px;
-  background: black;
-  opacity: 30%;
-  position: absolute;
-  border-radius: 50%;
-}
-
-.switch.active .switch-dot {
-  opacity: 100%;
-  left: 40px;
-}
-
-.settings-panel div.switch {
-  margin-bottom: 0;
-}
-
-#scanimate-button {
-  margin-top: 10px;
-  padding: 10px;
-  background: black;
-  color: white;
-  width: 100%;
-}
-
-.displayable-canvas {
-  position: absolute;
-}
-
-.displayable-canvas,
-#grids,
-.grid {
-  max-width: 70vw;
-  max-height: 70vh;
-}
-
-#loader {
-  position: absolute;
-  font-size: 5vw;
-}
-
-#grids {
-  position: absolute;
-}
-
-div:has(> input) {
-  height: 28px;
-  display: flex;
-  align-items: center;
-}
-
-input[type='range']:focus {
-  outline: none;
-}
-
-input[type='range']:disabled {
-  opacity: 30%;
-  cursor: default;
-}
-
-input[type='range'] {
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-  padding: 0;
-  height: 1px;
-  background: black;
-  border-radius: 5px;
-  border: none;
-}
-
-input[type='range']::-webkit-slider-thumb {
-  outline: none;
-  appearance: none;
-  width: 10px;
-  height: 10px;
-  background: black;
-  border-radius: 50%;
-}
-
-#frames_amount {
-  margin-left: 8px;
-  width: 50px;
-}
-
-label[for='frames_amount'] {
-  margin-left: 7px;
-}
-
-#grid-slider:not(.hidden) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: fixed;
-  bottom: 55px;
-  width: 50vw;
-}
-
-input[type='range']#grid-slider-input {
-  width: 100%;
-  height: 38px;
-  border-radius: 30px;
-  padding: 7px;
-  background: none;
-  border: solid 1px black;
-}
-
-input[type='range']#grid-slider-input::-webkit-slider-thumb {
-  width: 26px;
-  height: 26px;
-}
-
-#grid-label {
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-#upload-video-button {
-  height: 150px;
-  margin: 20px 0px;
-  width: 100%;
-  padding: 7px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-}
-
-#upload-video-button label {
-  cursor: pointer;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#upload-video-button label div {
-  border: solid 1px black;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(5px);
-  padding: 10px;
-  width: 100%;
-}
-
-#upload-video-button input {
-  display: none;
-}
-
-#upload-video-button video {
-  z-index: 0;
-  position: absolute;
-  height: 100%;
-}
-
-.hidden,
-div.hidden {
-  display: none;
-}
-
-/* HEADER */
-header {
-  line-height: 25px;
-  text-align: right;
-  width: 25vw;
-  font-size: 20px;
-  position: absolute;
-  top: 15px;
-  right: 10px;
-  padding: 15px 20px;
-}
-
-button#tour-button {
-  font-size: 20px;
-  padding: 5px 15px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(5px);
-  z-index: 10;
-  position: relative;
-}
-
-button#close-modal-button {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  border: none;
-  background: none;
-}
-
-#modal {
-  line-height: 30px;
-  text-align: left;
-  border: solid 1px black;
-  padding: 20px 25px;
-  position: absolute;
-  width: 30vw;
-  margin-top: 10px;
-  right: 25px;
-  backdrop-filter: blur(5px);
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* CREDITS FOOTER */
-footer#credits {
-  backdrop-filter: blur(5px);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  bottom: 15px;
-  right: 10px;
-  padding: 15px 20px;
-  font-size: 18px;
-  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto 1fr 1fr auto;
 }
 
 a {
-  color: black;
   text-decoration: none;
+  color: black;
+  cursor: pointer;
+}
+
+#video {
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  width: 20vw;
+  height: auto;
+  background: white;
+}
+
+#video #caption {
+  padding: 15px 20px;
+  font-size: 20px;
+  border: solid 2px black;
+}
+
+video {
+  display: block;
+  width: 100%;
+  border-left: solid 2px black;
+  border-right: solid 2px black;
+}
+
+#info {
+  display: flex;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: solid 2px black;
+}
+
+#info:hover > #wiki {
+  visibility: visible;
+}
+
+#wiki {
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+#wiki span {
+  border-bottom: solid 2px black;
+  margin-left: 10px;
+}
+
+article {
+  grid-column: 1;
+  grid-row: 3 / 5;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  display: flex;
+  justify-content: center;
+  padding: 25px 20px;
+  border-left: solid 2px black;
+}
+
+section {
+  grid-column: 2;
+  padding: 35px 25px;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+}
+
+section a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+section:hover > a div {
+  background: black;
+  color: white;
+}
+
+section div {
+  width: fit-content;
+  border: solid 2px black;
+  padding: 20px 40px;
+  background: white;
+  border-radius: 100px;
+  margin-right: 40px;
+}
+
+section p {
+  margin-left: 20px;
+  margin-top: 30px;
+  max-width: 60vw;
+}
+
+#mode-video {
   border-bottom: solid 1px black;
 }
 
-a#title {
-  border-width: 1.8px;
+#mode-svg {
+  border-top: solid 1px black;
 }
 
-a#repository-link {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  border: solid 1px black;
-  border-radius: 25px;
-  padding: 5px 15px;
-}
-
-a#repository-link span {
-  margin-left: 7px;
-}
-
-a#portfolio-link {
-  margin: 0 5px;
-}
-
-a#repository-link:hover,
-a#portfolio-link:hover {
-  color: blue;
-  border-color: blue;
-}
-
-a#repository-link:hover svg g {
-  stroke: blue;
-}
-
-@media all and (max-width: 1000px) {
-  header {
-    width: 30vw;
-  }
-
-  #modal {
-    width: 50vw;
-  }
-}
-
-@media all and (min-width: 1000px) and (max-width: 1200px) {
-  header {
-    width: 35vw;
-  }
-
-  #modal {
-    width: 50vw;
-  }
-}
-
+/* mobile  */
 @media all and (max-width: 850px) {
-  header {
+  * {
+    font-size: 15px;
+  }
+
+  #video {
+    top: 40%;
+    right: 10px;
+    width: 40vw;
+    border-bottom: solid 2px black;
+  }
+
+  #video div:last-child {
     display: none;
   }
 
-  #modal {
-    display: none;
+  #video #caption {
+    font-size: 15px;
+    padding: 8px;
   }
 
-  #controls-panel {
-    width: 100vw;
-    padding: 20px;
-    top: 0;
-    left: 0;
-    backdrop-filter: blur(20px);
+  #info {
+    display: block;
   }
 
-  .settings-panel {
-    width: 100%;
+  #wiki {
+    visibility: visible;
   }
 
-  .displayable-canvas,
-  #grids,
-  .grid {
-    margin-bottom: 30px;
+  #wiki,
+  #wiki span {
+    margin-left: 0;
   }
 
-  #grid-slider:not(.hidden) {
-    bottom: 160px;
-    width: 90vw;
+  section a div,
+  #wiki span {
+    border-width: 1px;
   }
 
-  #grid-buttons {
-    top: 135px;
+  article {
+    font-size: 15px;
   }
 
-  button.download:disabled {
-    display: none;
+  article {
+    padding: 8px;
+  }
+
+  section {
+    padding: 25px;
+  }
+
+  section a div {
+    padding: 10px 15px;
+  }
+
+  section a p {
+    margin-top: 18px;
+    margin-left: 10px;
+  }
+
+  section a div {
+    background: black;
+    color: white;
+  }
+
+  svg {
+    width: 20px;
+    margin-right: 6px;
+  }
+
+  svg g {
+    stroke-width: 6px;
   }
 }

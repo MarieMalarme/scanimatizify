@@ -7,7 +7,7 @@ body.style.overflow = 'hidden'
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 const round = (number) => Math.round((number + Number.EPSILON) * 100) / 100
 const pad_start0 = (string) => string.toString().padStart(2, '0')
-const generate_id = () => Math.random().toString(16).slice(10)
+const generate_random_id = () => Math.random().toString(16).slice(10)
 
 // disable download button
 const disable_download = (disabled) => {
@@ -27,10 +27,13 @@ let scanimation_id
 let grid_color = 'black'
 
 // set up the html elements
+const render_wrapper = document.createElement('div')
+render_wrapper.id = 'render-wrapper'
+body.append(render_wrapper)
 
 const buttons = document.createElement('div')
 buttons.id = 'grid-buttons'
-body.append(buttons)
+render_wrapper.append(buttons)
 
 // button to hide the grids
 const hide_grid_button = document.createElement('button')
@@ -41,7 +44,7 @@ buttons.append(hide_grid_button)
 
 hide_grid_button.addEventListener('click', () => {
   const is_grid_hidden = grids.classList.toggle('hidden')
-  grid_slider.classList.toggle('hidden')
+  grid_slider.classList.toggle('invisible')
   hide_grid_button.textContent = is_grid_hidden ? 'Show grid' : 'Hide grid'
 })
 
@@ -76,36 +79,23 @@ let animation_axis = animation_axes[0]
 
 const controls_panel = document.createElement('div')
 controls_panel.id = 'controls-panel'
-body.append(controls_panel)
+render_wrapper.append(controls_panel)
 
 const close_controls_button = document.createElement('button')
 close_controls_button.id = 'close-controls-button'
 close_controls_button.textContent = 'Close settings'
 controls_panel.append(close_controls_button)
 close_controls_button.addEventListener('click', () => {
-  const settings_panels = [
-    ...document.querySelectorAll(
-      '#controls-panel *:not(button#close-controls-button)',
-    ),
-  ]
-
-  const are_settings_hidden = settings_panels[0].classList.contains('hidden')
-
-  video_upload.classList.toggle('hidden')
+  const are_settings_hidden = controls_wrapper.classList.contains('hidden')
+  controls_wrapper.classList.toggle('hidden')
   close_controls_button.textContent = `${
     are_settings_hidden ? 'Close' : 'Open'
   } settings`
-
-  controls_panel.style.height = `${are_settings_hidden ? '100vh' : 'auto'}`
-
-  if (extracted_frames.length) {
-    scanimation_settings.classList.toggle('hidden')
-
-    if (download_zip_button.disabled) {
-      download_zip_button.classList.toggle('hidden')
-    }
-  }
 })
+
+const controls_wrapper = document.createElement('div')
+controls_wrapper.id = 'controls-wrapper'
+controls_panel.append(controls_wrapper)
 
 // panel for video upload
 const video_upload = document.createElement('div')
@@ -114,7 +104,7 @@ video_upload.className = 'settings-panel'
 video_upload_label = document.createElement('p')
 video_upload_label.textContent = 'Video upload'
 video_upload.append(video_upload_label)
-controls_panel.append(video_upload)
+controls_wrapper.append(video_upload)
 
 // video element
 const video = document.createElement('video')
@@ -239,7 +229,7 @@ upload_video_input.addEventListener('change', async (event) => {
     // update UI to turn the upload button into a loader & give feedback
     upload_video_input.disabled = true
     upload_video_label.style.cursor = 'default'
-    upload_video_label_text.textContent = 'Reading video to extract frames...'
+    upload_video_label_text.textContent = 'Extracting video frames...'
 
     // read each frame and save it as an image
     let frame_index = 0
@@ -289,7 +279,7 @@ scanimation_settings.className = 'settings-panel hidden'
 scanimation_settings_label = document.createElement('p')
 scanimation_settings_label.textContent = 'Scanimation settings'
 scanimation_settings.append(scanimation_settings_label)
-controls_panel.append(scanimation_settings)
+controls_wrapper.append(scanimation_settings)
 
 // input to set the size of the render
 const size = document.createElement('div')
@@ -468,12 +458,16 @@ loader.classList.add('hidden')
 loader.textContent = 'Scanimating...'
 body.append(loader)
 
+const render_playground = document.createElement('div')
+render_playground.id = 'render-playground'
+render_wrapper.append(render_playground)
+
 // set render canvas to draw the scanimation image result
 const render_canvas = document.createElement('canvas')
 const render_context = render_canvas.getContext('2d')
 render_canvas.id = 'render-canvas'
 render_canvas.className = 'displayable-canvas hidden'
-body.append(render_canvas)
+render_playground.append(render_canvas)
 
 // set container to draw the grids to animate the image result
 const grids = document.createElement('div')
@@ -494,14 +488,14 @@ grid_hiders.classList.add('grid')
 grid_hiders.id = 'grid-hiders'
 grids.append(grid_hiders)
 
-body.append(grids)
+render_playground.append(grids)
 
 // create a grid slider to move the grid on top of the scanimation image
 // and have an overview of the animation
 const grid_slider = document.createElement('div')
 grid_slider.id = 'grid-slider'
 grid_slider.classList.add('hidden')
-body.append(grid_slider)
+render_wrapper.append(grid_slider)
 
 const grid_label = document.createElement('label')
 grid_label.id = 'grid-label'
@@ -551,7 +545,7 @@ scanimate_button.addEventListener('click', async () => {
   // scanimation is starting
 
   // set scanimation id for downloads
-  scanimation_id = generate_id()
+  scanimation_id = generate_random_id()
 
   // clear render canvas & grids to redraw if already drawn on
   render_context.clearRect(0, 0, 2000, 2000) // value that should be big enough to clear everything
@@ -698,14 +692,6 @@ scanimate_button.addEventListener('click', async () => {
   set_grid_mode_button.classList.remove('hidden')
   set_grid_mode_button.textContent = 'See cutouts'
 
-  // hide settings panels on mobile
-  if (window.matchMedia('(max-width: 850px)').matches) {
-    video_upload.classList.add('hidden')
-    scanimation_settings.classList.add('hidden')
-    close_controls_button.textContent = 'Open settings'
-    controls_panel.style.height = 'auto'
-  }
-
   // enable download button
   disable_download(false)
 })
@@ -753,12 +739,15 @@ const generate_file = {
   // create text string with all the custom settings from inputs to get txt file
   settings: () => {
     const date = get_today_date()
-    let text = `Scanimation #${scanimation_id} generated on ${date}\n\n`
-    const inputs_css_query = `input:not([type='range']), select, .switch`
+    let text = `Scanimation #${scanimation_id} generated on ${date}\nfrom scanimatizify.studiodev.xyz\n\n`
+    const inputs_css_query = `input:not(#grid-slider-input):not(#upload), select, .switch`
     const inputs = document.querySelectorAll(inputs_css_query)
+    // to do: add mode (video or svg) / add video src?
     inputs.forEach((input) => {
-      const label = document.querySelector(`label[for='${input.id}']`)
-      text += `${label.textContent}: ${input.value}\n`
+      const label_css_query = `label[for='${input.id}']`
+      const { textContent: label } = document.querySelector(label_css_query)
+      const label_has_value = label.includes(':')
+      text += label_has_value ? `${label}\n` : `${label}: ${input.value}\n`
     })
     text += '\nHope you enjoy it hihi!\n\n© Marie Malarme 2022'
     return text
@@ -804,7 +793,7 @@ download_zip_button.disabled = true
 download_zip_button.textContent = 'Download ZIP file'
 download_zip_button.classList.add('hidden')
 download_zip_button.addEventListener('click', download_zip)
-controls_panel.append(download_zip_button)
+controls_wrapper.append(download_zip_button)
 
 // UI guided tour modal
 const modal = document.querySelector('#modal')

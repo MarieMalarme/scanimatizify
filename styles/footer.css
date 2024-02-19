@@ -1,0 +1,56 @@
+footer {
+  font-size: 30px;
+  text-align: right;
+  width: 100%;
+  border-top: solid 2px black;
+  display: flex;
+  justify-content: flex-end;
+}
+
+footer div {
+  padding: 20px 25px;
+}
+
+footer div:nth-child(1) {
+  border-right: solid 2px black;
+}
+
+footer span {
+  border-bottom: solid 2px black;
+}
+
+footer svg {
+  margin-right: 10px;
+}
+
+footer div a span {
+  margin-left: 9px;
+}
+
+/* mobile  */
+@media all and (max-width: 850px) {
+  footer div span {
+    border-width: 1px;
+  }
+
+  footer {
+    font-size: 15px;
+  }
+
+  footer div {
+    padding: 10px 15px;
+  }
+
+  footer div a span {
+    margin-left: 5px;
+  }
+
+  footer svg {
+    width: 20px;
+    margin-right: 6px;
+  }
+
+  footer svg g {
+    stroke-width: 6px;
+  }
+}

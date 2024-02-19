@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scanimatizify</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="../styles/header.css">
+  <link rel="stylesheet" type="text/css" href="../styles/footer.css">
+</head>
+<body>
+
+  <header>
+    <a href="https://scanimatizify.studiodev.xyz">
+      <div>
+        <span>Scanimatizify</span>
+      </div>
+    </a>
+    <div>A tool to generate printable scanimation material.</div>
+  </header>
+
+  <div id="tour">
+    <button id="tour-button" style="margin-top: 20px;">Want a guided tour?</button>
+    <div id="modal" class="">
+      <button id="close-modal-button">
+        <svg width="16px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+          <g fill="none" stroke="black" stroke-width="75">
+            <line x1="55" y1="55" x2="945" y2="945" />
+            <line x1="945" y1="55" x2="55" y2="945" />
+          </g>
+        </svg>
+      </button>
+      <div>1. Be sure to check what a scanimation is <a href="https://en.wikipedia.org/wiki/Barrier-grid_animation_and_stereography" target="_blank">here</a>.</div>
+      <div>2. Upload a video of your choice — not a too long one; a few seconds is enough.</div>
+      <div>3. Choose your scanimation settings.</div>
+      <div>4. Scanimate!</div>
+      <div>5. Admire the result and try it out moving the grid both ways!</div>
+      <div>6. Download & extract the ZIP file.</div>
+      <div>7. Print your scanimated image on paper.</div>
+      <div>8. Either print the grid on a transparent film, or cut out the cutouts grid.</div>
+      <div>9. Have fun IRL!</div>
+    </div>
+  </div>
+
+  <footer id="credits">
+    <a href="https://github.com/MarieMalarme/scanimatizify" target="_blank">
+      <div style="display: flex; align-items: center;">
+        <svg width="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+          <g fill="none" stroke="black" stroke-width="8.5">
+            <polyline points="72.85,17.6 120.5,65.25 72.85,112.9" />
+            <line x1="5.5" y1="65.25" x2="119.84" y2="65.25" />
+          </g>
+        </svg>
+        <span>Code repository</span>
+      </div>
+    </a>
+    <div style="display: flex; align-items: center;">© 2023
+      <a id="portfolio-link" href="https://marie.studiodev.xyz/" target="_blank">
+        <span>Marie Malarme</span>
+      </a>
+    </div>
+  </footer>
+
+  <script src="../libs/jszip.min.js"></script>
+  <script type="text/javascript" src="index.js"></script>
+
+</body>
+</html>
